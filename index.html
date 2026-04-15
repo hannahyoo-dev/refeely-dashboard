@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Refeely Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+--primary:#50CC93;--primary-light:#6DD9A6;--primary-bg:#EEFBF4;
+--success:#50CC93;--success-bg:#EEFBF4;
+--warning:#ea580c;--warning-bg:#fff7ed;
+--purple:#AA9587;--purple-bg:#F7F3F1;
+--rose:#e11d48;--rose-bg:#fff1f2;
+--teal:#3BA876;--teal-bg:#EEFBF4;
+--amber:#AA9587;--amber-bg:#F7F3F1;
+--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;
+--gray-400:#9ca3af;--gray-500:#6b7280;--gray-600:#4b5563;
+--gray-700:#374151;--gray-800:#1f2937;--gray-900:#111827;
+--radius:16px;
+--shadow-sm:0 1px 2px rgba(0,0,0,0.04);
+--shadow-md:0 4px 6px -1px rgba(0,0,0,0.06),0 2px 4px -2px rgba(0,0,0,0.04);
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* HEADER */
+.header{background:white;border-bottom:1px solid var(--gray-200);padding:20px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-left{display:flex;align-items:center;gap:16px;}
+.logo{width:40px;height:40px;background:linear-gradient(135deg,#50CC93,#3BA876);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:18px;}
+.header-title{font-size:20px;font-weight:700;color:var(--gray-900);}
+.header-subtitle{font-size:13px;color:var(--gray-400);}
+.header-right{display:flex;align-items:center;gap:12px;}
+.live-badge{display:flex;align-items:center;gap:6px;background:#fef2f2;color:#dc2626;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+.live-dot{width:7px;height:7px;background:#dc2626;border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+.date-display{font-size:14px;color:var(--gray-500);font-weight:500;}
+
+/* EDIT MODE TOGGLE */
+.edit-toggle{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:13px;font-weight:600;color:var(--gray-600);transition:all .2s;}
+.edit-toggle:hover{border-color:#50CC93;color:#3BA876;}
+.edit-toggle.active{background:#50CC93;color:white;border-color:#50CC93;}
+.edit-toggle svg{width:16px;height:16px;}
+
+/* TABS */
+.tab-bar{background:white;border-bottom:1px solid var(--gray-200);padding:0 40px;display:flex;gap:0;overflow-x:auto;align-items:center;}
+.tab-btn{padding:14px 24px;font-size:14px;font-weight:600;color:var(--gray-400);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab-btn:hover{color:var(--gray-600);}
+.tab-btn.active{color:#3BA876;border-bottom-color:#50CC93;}
+.tab-btn .tab-emoji{margin-right:6px;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.add-team-btn{padding:10px 18px;font-size:13px;font-weight:600;color:#3BA876;border:1.5px dashed #50CC93;background:#EEFBF4;border-radius:8px;cursor:pointer;margin:6px 0 6px 8px;white-space:nowrap;transition:all .2s;display:none;}
+.add-team-btn:hover{background:#50CC93;color:white;}
+body.edit-mode .add-team-btn{display:block;}
+
+.main{max-width:1320px;margin:0 auto;padding:32px 40px 60px;}
+
+/* BANNER */
+.banner{background:linear-gradient(135deg,#50CC93 0%,#3BA876 50%,#AA9587 100%);border-radius:var(--radius);padding:36px 40px;color:white;margin-bottom:32px;position:relative;overflow:hidden;}
+.banner::before{content:'';position:absolute;top:-50%;right:-20%;width:400px;height:400px;background:rgba(255,255,255,.05);border-radius:50%;}
+.banner-content{position:relative;z-index:1;}
+.banner-greeting{font-size:14px;opacity:.8;font-weight:500;margin-bottom:8px;}
+.banner-headline{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:6px;}
+.banner-sub{font-size:15px;opacity:.75;}
+
+/* CARDS */
+.team-overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;}
+.team-overview-card{background:white;border-radius:var(--radius);padding:24px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.team-overview-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.team-overview-card .card-accent{position:absolute;top:0;left:0;right:0;height:4px;}
+.team-name{font-size:15px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.team-emoji{font-size:20px;}
+.team-main-goal{font-size:13px;color:var(--gray-500);font-weight:500;margin-bottom:16px;line-height:1.5;}
+.team-metric{display:flex;align-items:flex-end;gap:4px;margin-bottom:10px;}
+.team-metric-value{font-size:28px;font-weight:800;line-height:1;letter-spacing:-.02em;}
+.team-metric-unit{font-size:14px;font-weight:600;color:var(--gray-400);margin-bottom:2px;}
+.mini-progress{width:100%;height:8px;background:var(--gray-100);border-radius:6px;overflow:hidden;}
+.mini-progress-fill{height:100%;border-radius:6px;transition:width 1s ease;}
+.mini-progress-label{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;font-weight:600;}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.stat-card{background:white;border-radius:var(--radius);padding:24px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);transition:all .2s;}
+.stat-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);}
+.stat-label{font-size:13px;color:var(--gray-500);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.stat-value{font-size:32px;font-weight:800;color:var(--gray-900);letter-spacing:-.02em;line-height:1;}
+.stat-unit{font-size:16px;font-weight:600;color:var(--gray-400);margin-left:2px;}
+.stat-change{font-size:12px;font-weight:600;margin-top:8px;}
+.stat-change.positive{color:var(--success);}
+.stat-change.caution{color:var(--warning);}
+
+.card{background:white;border-radius:var(--radius);padding:28px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);margin-bottom:24px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.card-title{font-size:16px;font-weight:700;color:var(--gray-900);}
+.card-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;background:var(--primary-bg);color:var(--primary);}
+
+/* TEAM PAGE */
+.team-page-header{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+.team-page-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;}
+.team-page-title{font-size:24px;font-weight:800;color:var(--gray-900);}
+.team-page-desc{font-size:14px;color:var(--gray-500);}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-bottom:28px;}
+.kpi-card{background:white;border-radius:var(--radius);padding:24px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);position:relative;}
+.kpi-title{font-size:13px;color:var(--gray-500);font-weight:500;margin-bottom:10px;}
+.kpi-row{display:flex;align-items:flex-end;justify-content:space-between;}
+.kpi-value{font-size:28px;font-weight:800;line-height:1;letter-spacing:-.02em;}
+.kpi-target{font-size:12px;color:var(--gray-400);font-weight:500;}
+.kpi-progress{margin-top:14px;}
+
+.progress-track{width:100%;height:14px;background:var(--gray-100);border-radius:10px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:10px;transition:width 1.5s cubic-bezier(.4,0,.2,1);}
+.progress-fill.green{background:linear-gradient(90deg,#50CC93,#6DD9A6);}
+.progress-fill.brown{background:linear-gradient(90deg,#AA9587,#C4B5A9);}
+.progress-fill.teal{background:linear-gradient(90deg,#3BA876,#50CC93);}
+.progress-fill.sage{background:linear-gradient(90deg,#7BAE8E,#9CC5AA);}
+.progress-fill.rose{background:linear-gradient(90deg,#C4867A,#D9A89F);}
+.progress-fill.slate{background:linear-gradient(90deg,#8B9DAF,#A8B8C8);}
+
+.goal-list{display:flex;flex-direction:column;gap:16px;}
+.goal-item{background:white;border-radius:var(--radius);padding:24px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);position:relative;}
+.goal-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.goal-item-title{font-size:15px;font-weight:700;color:var(--gray-800);}
+.goal-status{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;}
+.goal-status.on-track{background:var(--success-bg);color:var(--success);}
+.goal-status.at-risk{background:var(--warning-bg);color:var(--warning);}
+.goal-status.behind{background:var(--rose-bg);color:var(--rose);}
+.goal-item-meta{display:flex;gap:24px;font-size:13px;color:var(--gray-500);margin-bottom:14px;flex-wrap:wrap;}
+.goal-item-meta strong{color:var(--gray-700);}
+
+/* EDIT BUTTONS (hidden by default, shown in edit mode) */
+.edit-btn{display:none;position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;align-items:center;justify-content:center;font-size:14px;transition:all .2s;z-index:5;}
+.edit-btn:hover{border-color:#50CC93;background:#EEFBF4;}
+.delete-btn{display:none;position:absolute;top:12px;right:50px;width:32px;height:32px;border-radius:8px;border:1.5px solid #fecaca;background:#fff5f5;cursor:pointer;align-items:center;justify-content:center;font-size:14px;color:var(--rose);transition:all .2s;z-index:5;}
+.delete-btn:hover{background:#fecaca;}
+body.edit-mode .edit-btn,body.edit-mode .delete-btn{display:flex;}
+.add-btn{display:none;padding:14px;border-radius:var(--radius);border:2px dashed var(--gray-300);background:var(--gray-50);cursor:pointer;font-size:14px;font-weight:600;color:var(--gray-400);text-align:center;transition:all .2s;margin-top:16px;}
+.add-btn:hover{border-color:#50CC93;color:#3BA876;background:#EEFBF4;}
+body.edit-mode .add-btn{display:block;}
+
+/* D-DAY */
+.grid-3col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.dday-card{background:white;border-radius:var(--radius);padding:24px;text-align:center;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);}
+.dday-label{font-size:13px;color:var(--gray-500);font-weight:500;margin-bottom:8px;}
+.dday-number{font-size:48px;font-weight:900;letter-spacing:-.03em;line-height:1;margin-bottom:4px;}
+.dday-number.blue{color:#50CC93;}
+.dday-number.purple{color:#AA9587;}
+.dday-number.rose{color:var(--rose);}
+.dday-sub{font-size:12px;color:var(--gray-400);font-weight:500;}
+
+/* MILESTONE */
+.milestone-track{position:relative;padding:8px 0;}
+.milestone-line{position:absolute;top:18px;left:16px;right:16px;height:3px;background:var(--gray-200);border-radius:2px;}
+.milestone-line-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,#50CC93,#AA9587);border-radius:2px;transition:width 2s ease;}
+.milestone-points{position:relative;display:flex;justify-content:space-between;z-index:1;}
+.milestone-point{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.milestone-dot{width:18px;height:18px;border-radius:50%;background:white;border:3px solid var(--gray-300);}
+.milestone-dot.reached{background:#50CC93;border-color:#50CC93;box-shadow:0 0 0 4px rgba(80,204,147,.2);}
+.milestone-dot.current{background:white;border-color:#50CC93;box-shadow:0 0 0 4px rgba(80,204,147,.2);animation:cp 2s infinite;}
+@keyframes cp{0%,100%{box-shadow:0 0 0 4px rgba(80,204,147,.2);}50%{box-shadow:0 0 0 8px rgba(80,204,147,.1);}}
+.milestone-label{font-size:11px;color:var(--gray-400);font-weight:500;text-align:center;}
+.milestone-label.active{color:var(--primary);font-weight:700;}
+.milestone-amount{font-size:12px;font-weight:700;color:var(--gray-700);}
+.milestone-amount.active{color:var(--primary);}
+
+/* QUOTE */
+.quote-card{background:white;border-radius:var(--radius);padding:32px 40px;border:1px solid var(--gray-200);text-align:center;margin-top:24px;}
+.quote-icon{font-size:32px;color:var(--gray-200);margin-bottom:12px;}
+.quote-text{font-size:18px;font-weight:600;color:var(--gray-700);line-height:1.6;max-width:600px;margin:0 auto;}
+.quote-author{font-size:13px;color:var(--gray-400);margin-top:12px;font-weight:500;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border-radius:20px;padding:32px;width:90%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);}
+.modal-title{font-size:20px;font-weight:800;color:var(--gray-900);margin-bottom:24px;}
+.form-group{margin-bottom:18px;}
+.form-label{font-size:13px;font-weight:600;color:var(--gray-600);margin-bottom:6px;display:block;}
+.form-input{width:100%;padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-family:inherit;transition:border-color .2s;outline:none;}
+.form-input:focus{border-color:#50CC93;}
+.form-select{width:100%;padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-family:inherit;background:white;outline:none;cursor:pointer;}
+.form-select:focus{border-color:#50CC93;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;}
+.btn{padding:10px 24px;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;border:none;}
+.btn-primary{background:#50CC93;color:white;}
+.btn-primary:hover{background:#3BA876;}
+.btn-cancel{background:var(--gray-100);color:var(--gray-600);}
+.btn-cancel:hover{background:var(--gray-200);}
+.btn-danger{background:var(--rose);color:white;}
+.btn-danger:hover{background:#be123c;}
+
+.footer{text-align:center;padding:20px;font-size:12px;color:var(--gray-400);}
+
+/* SYNC UI */
+.sync-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;background:var(--gray-100);color:var(--gray-500);}
+.sync-status.connected{background:#EEFBF4;color:#3BA876;}
+.sync-status.syncing{background:#FEF9C3;color:#CA8A04;}
+.sync-status.error{background:#fef2f2;color:#dc2626;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.sync-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-600);transition:all .2s;}
+.sync-btn:hover{border-color:#50CC93;color:#3BA876;}
+.sync-btn svg{width:14px;height:14px;}
+.sync-btn.spinning svg{animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.sync-settings-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-600);transition:all .2s;}
+.sync-settings-btn:hover{border-color:#50CC93;color:#3BA876;}
+.sync-toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;color:white;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
+.sync-toast.show{opacity:1;transform:translateY(0);}
+.sync-toast.success{background:#3BA876;}
+.sync-toast.error{background:#dc2626;}
+.sync-toast.info{background:#50CC93;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+.main{padding:20px;}.stats-row{grid-template-columns:repeat(2,1fr);}.grid-3col{grid-template-columns:1fr;}.header{padding:16px 20px;}.tab-bar{padding:0 16px;}
+}
+@media(max-width:600px){
+.stats-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <div class="logo">R</div>
+        <div><div class="header-title">2026 Refeely Dashboard</div><div class="header-subtitle">Company Revenue & Team Tracker</div></div>
+    </div>
+    <div class="header-right">
+        <div class="sync-status" id="syncStatus"><span class="sync-dot"></span><span id="syncLabel">로컬 모드</span></div>
+        <button class="sync-btn" id="syncRefreshBtn" onclick="manualSync()" title="새로고침">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+        <button class="sync-settings-btn" onclick="openSyncModal()">☁️ 동기화 설정</button>
+        <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+        <div class="date-display" id="currentDate"></div>
+        <button class="edit-toggle" id="editToggle" onclick="toggleEditMode()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            편집 모드
+        </button>
+    </div>
+</div>
+
+<div class="tab-bar" id="tabBar"></div>
+
+<div class="main" id="mainContent"></div>
+
+<div class="footer">Updated in real-time · 2026 Refeely Dashboard</div>
+<div class="sync-toast" id="syncToast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modalContent"></div>
+</div>
+<!-- 숨겨진 iframe: form POST 저장용 (CORS 우회 + URL 길이 제한 없음) -->
+<iframe id="syncFrame" name="syncFrame" style="display:none"></iframe>
+
+<script>
+// ===== COLOR THEMES =====
+const COLORS = [
+    {name:'green',main:'#50CC93',light:'#6DD9A6',bg:'#EEFBF4',grad:'linear-gradient(90deg,#50CC93,#6DD9A6)',cls:'green'},
+    {name:'brown',main:'#AA9587',light:'#C4B5A9',bg:'#F7F3F1',grad:'linear-gradient(90deg,#AA9587,#C4B5A9)',cls:'brown'},
+    {name:'teal',main:'#3BA876',light:'#50CC93',bg:'#EEFBF4',grad:'linear-gradient(90deg,#3BA876,#50CC93)',cls:'teal'},
+    {name:'sage',main:'#7BAE8E',light:'#9CC5AA',bg:'#F0F7F3',grad:'linear-gradient(90deg,#7BAE8E,#9CC5AA)',cls:'sage'},
+    {name:'rose',main:'#C4867A',light:'#D9A89F',bg:'#FBF1EF',grad:'linear-gradient(90deg,#C4867A,#D9A89F)',cls:'rose'},
+    {name:'slate',main:'#8B9DAF',light:'#A8B8C8',bg:'#F1F4F7',grad:'linear-gradient(90deg,#8B9DAF,#A8B8C8)',cls:'slate'},
+];
+
+const EMOJIS = ['🤝','🛒','🏭','💼','🚀','📱','💡','🎨','📊','🔧','🌍','🎯'];
+const STATUS_OPTIONS = [{v:'on-track',l:'순조'},{v:'at-risk',l:'주의'},{v:'behind',l:'위험'}];
+
+// ===== DEFAULT DATA =====
+function getDefaultData(){
+    return {
+        company:{
+            name:'2026 Refeely Dashboard',
+            annualTarget:20,
+            annualCurrent:1,
+            q2Target:3.2,
+            q2Current:0,
+            quarters:[
+                {label:'Q1 (1~3월)',target:2,current:1},
+                {label:'Q2 (4~6월)',target:3.2,current:0},
+                {label:'Q3 (7~9월)',target:6,current:0},
+                {label:'Q4 (10~12월)',target:8.8,current:0}
+            ],
+            monthlyActual:[2800,3200,4000,0,0,0,0,0,0,0,0,0],
+            monthlyTarget:[8000,8000,8000,10000,10000,12000,16000,18000,20000,24000,26000,28000]
+        },
+        teams:[
+            {id:'b2b',name:'B2B팀',emoji:'🤝',colorIdx:0,desc:'기업 고객 영업 및 파트너십',
+                mainGoal:'기업 고객 계약 매출 12억 달성',mainCurrent:0.6,mainTarget:12,mainUnit:'억',
+                quarters:[
+                    {label:'Q1 (1~3월)',target:'2억',current:'0.6억',percent:30},
+                    {label:'Q2 (4~6월)',target:'3억',current:'0억',percent:0},
+                    {label:'Q3 (7~9월)',target:'3.5억',current:'—',percent:0},
+                    {label:'Q4 (10~12월)',target:'3.5억',current:'—',percent:0}
+                ],
+                kpis:[
+                    {title:'계약 매출',current:'0.6억',target:'목표 12억',percent:5,quarter:'all'},
+                    {title:'신규 계약 건수',current:'3건',target:'목표 40건',percent:7.5,quarter:'all'},
+                    {title:'영업 파이프라인',current:'4.2억',target:'진행중 딜',percent:35,quarter:'Q1'}
+                ],
+                goals:[
+                    {title:'대기업 연간 계약 체결',status:'at-risk',target:'5건',current:'1건',deadline:'12월',percent:20,quarter:'all'},
+                    {title:'중소기업 신규 계약',status:'on-track',target:'35건',current:'2건',deadline:'12월',percent:5.7,quarter:'all'},
+                    {title:'건당 평균 계약금액 3,000만원 이상',status:'on-track',target:'3,000만원',current:'2,000만원',deadline:'연간',percent:66,quarter:'Q2'},
+                    {title:'고객 재계약률 80% 유지',status:'on-track',target:'80%',current:'85%',deadline:'연간',percent:100,quarter:'all'}
+                ]
+            },
+            {id:'d2c',name:'D2C팀',emoji:'🛒',colorIdx:1,desc:'자사몰 및 마켓플레이스 운영',
+                mainGoal:'자사몰 + 마켓플레이스 매출 8억 달성',mainCurrent:0.4,mainTarget:8,mainUnit:'억',
+                quarters:[
+                    {label:'Q1 (1~3월)',target:'1억',current:'0.4억',percent:40},
+                    {label:'Q2 (4~6월)',target:'1.5억',current:'0억',percent:0},
+                    {label:'Q3 (7~9월)',target:'2.5억',current:'—',percent:0},
+                    {label:'Q4 (10~12월)',target:'3억',current:'—',percent:0}
+                ],
+                kpis:[
+                    {title:'D2C 총 매출',current:'0.4억',target:'목표 8억',percent:5,quarter:'all'},
+                    {title:'월 주문건수',current:'480건',target:'목표 2,000건/월',percent:24,quarter:'all'},
+                    {title:'객단가',current:'38,000원',target:'목표 45,000원',percent:84,quarter:'Q1'}
+                ],
+                goals:[
+                    {title:'자사몰 매출 3억 달성',status:'at-risk',target:'3억',current:'0.15억',deadline:'12월',percent:5,quarter:'all'},
+                    {title:'마켓플레이스(쿠팡/네이버) 매출 5억',status:'on-track',target:'5억',current:'0.25억',deadline:'12월',percent:5,quarter:'all'},
+                    {title:'재구매율 30% 달성',status:'on-track',target:'30%',current:'22%',deadline:'연간',percent:73,quarter:'Q2'},
+                    {title:'월 신규 회원 500명 확보',status:'on-track',target:'500명/월',current:'320명/월',deadline:'월간',percent:64,quarter:'all'}
+                ]
+            },
+            {id:'production',name:'생산팀',emoji:'🏭',colorIdx:2,desc:'제품 생산 및 품질 관리',
+                mainGoal:'생산 원가율 35% 이하 달성',mainCurrent:42,mainTarget:35,mainUnit:'%',
+                quarters:[
+                    {label:'Q1 (1~3월)',target:'원가율 40%',current:'42%',percent:50},
+                    {label:'Q2 (4~6월)',target:'원가율 38%',current:'—',percent:0},
+                    {label:'Q3 (7~9월)',target:'원가율 36%',current:'—',percent:0},
+                    {label:'Q4 (10~12월)',target:'원가율 35%',current:'—',percent:0}
+                ],
+                kpis:[
+                    {title:'생산 원가율',current:'42%',target:'목표 35% 이하',percent:60,quarter:'all'},
+                    {title:'불량률',current:'2.1%',target:'목표 1% 이하',percent:47,quarter:'Q1'},
+                    {title:'생산 리드타임',current:'14일',target:'목표 10일',percent:71,quarter:'Q2'}
+                ],
+                goals:[
+                    {title:'원가율 35% 이하 달성',status:'at-risk',target:'35%',current:'42%',deadline:'Q3',percent:60,quarter:'Q3'},
+                    {title:'제품 불량률 1% 이하',status:'at-risk',target:'1%',current:'2.1%',deadline:'Q4',percent:47,quarter:'Q4'},
+                    {title:'신제품 3종 출시',status:'on-track',target:'3종',current:'1종 완료',deadline:'12월',percent:33,quarter:'all'},
+                    {title:'생산 리드타임 10일 이내',status:'on-track',target:'10일',current:'14일',deadline:'Q3',percent:71,quarter:'Q3'}
+                ]
+            },
+            {id:'admin',name:'경영지원팀',emoji:'💼',colorIdx:3,desc:'재무, 인사, 총무 관리',
+                mainGoal:'월 운영비용 8,000만원 이내 관리',mainCurrent:7200,mainTarget:8000,mainUnit:'만원',
+                quarters:[
+                    {label:'Q1 (1~3월)',target:'운영비 8,000만 이내',current:'7,200만',percent:100},
+                    {label:'Q2 (4~6월)',target:'채용 5명 완료',current:'3명',percent:60},
+                    {label:'Q3 (7~9월)',target:'시스템 3개 도입',current:'—',percent:0},
+                    {label:'Q4 (10~12월)',target:'만족도 4.5점',current:'—',percent:0}
+                ],
+                kpis:[
+                    {title:'월 운영비용',current:'7,200만',target:'한도 8,000만',percent:90,quarter:'all'},
+                    {title:'인원 충원률',current:'78%',target:'목표 100%',percent:78,quarter:'Q2'},
+                    {title:'직원 만족도',current:'4.1점',target:'목표 4.5점',percent:91,quarter:'all'}
+                ],
+                goals:[
+                    {title:'월 운영비 8,000만원 이내 유지',status:'on-track',target:'8,000만/월',current:'7,200만/월',deadline:'월간',percent:100,quarter:'all'},
+                    {title:'핵심 인력 채용 완료 (8명)',status:'at-risk',target:'8명',current:'3명 완료',deadline:'Q2',percent:37.5,quarter:'Q2'},
+                    {title:'직원 만족도 4.5점 이상',status:'on-track',target:'4.5점',current:'4.1점',deadline:'12월',percent:91,quarter:'Q4'},
+                    {title:'사내 시스템 디지털화 완료',status:'on-track',target:'5개 시스템',current:'2개 완료',deadline:'Q4',percent:40,quarter:'Q3'}
+                ]
+            }
+        ]
+    };
+}
+
+// ===== STATE =====
+const STORAGE_KEY = 'refeelyDashboardData_v5';
+const SYNC_URL_KEY = 'refeelyDashboardSyncUrl';
+// 저장된 데이터가 유효한지 검증 후 로드 (깨진 데이터 자동 복구)
+let _saved = null;
+try { _saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e){}
+let DATA = (_saved && typeof _saved==='object' && _saved.company && Array.isArray(_saved.teams)) ? _saved : getDefaultData();
+localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+let editMode = false;
+let activeTab = 'overview';
+let selectedQuarter = 'all';
+let syncUrl = localStorage.getItem(SYNC_URL_KEY) || '';
+let isSyncing = false;
+
+function saveData(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+    if(syncUrl) pushToCloud();
+}
+
+// ===== GOOGLE SHEETS SYNC (JSONP — CORS 우회) =====
+let _jsonpCounter = 0;
+
+function showToast(msg, type='success'){
+    const t=document.getElementById('syncToast');
+    t.textContent=msg;t.className='sync-toast '+type+' show';
+    setTimeout(()=>{t.classList.remove('show');},3000);
+}
+
+function updateSyncUI(state, label){
+    const el=document.getElementById('syncStatus');
+    const lb=document.getElementById('syncLabel');
+    el.className='sync-status '+state;
+    lb.textContent=label;
+}
+
+// JSONP: <script> 태그로 Google Apps Script 호출 (CORS 제한 없음)
+function jsonpCall(url, params){
+    return new Promise((resolve, reject)=>{
+        const cbName = '_refeelyCallback_' + (++_jsonpCounter) + '_' + Date.now();
+        const timeout = setTimeout(()=>{
+            delete window[cbName];
+            if(script.parentNode) script.parentNode.removeChild(script);
+            reject(new Error('요청 시간 초과 (15초)'));
+        }, 15000);
+
+        window[cbName] = function(data){
+            clearTimeout(timeout);
+            delete window[cbName];
+            if(script.parentNode) script.parentNode.removeChild(script);
+            resolve(data);
+        };
+
+        const qs = new URLSearchParams(params);
+        qs.set('callback', cbName);
+        const script = document.createElement('script');
+        script.src = url + '?' + qs.toString();
+        script.onerror = function(){
+            clearTimeout(timeout);
+            delete window[cbName];
+            if(script.parentNode) script.parentNode.removeChild(script);
+            reject(new Error('스크립트 로드 실패 — URL을 확인하세요'));
+        };
+        document.body.appendChild(script);
+    });
+}
+
+function openSyncModal(){
+    openModal(`
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">☁️ Google Sheets 동기화 설정</h3>
+        <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px;line-height:1.6">
+            Google Apps Script 웹 앱 URL을 입력하면 여러 사람이 동시에 데이터를 공유할 수 있습니다.<br>
+            설정 방법은 함께 제공된 <strong>연동 가이드</strong>를 참고하세요.
+        </p>
+        <label class="modal-label">Google Apps Script URL</label>
+        <input id="m_syncUrl" class="modal-input" value="${syncUrl}" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:13px;">
+        <div id="syncTestResult" style="margin-top:12px;padding:12px;border-radius:8px;background:${syncUrl?'#EEFBF4':'var(--gray-50)'};font-size:12px;color:${syncUrl?'#3BA876':'var(--gray-400)'}">
+            ${syncUrl?'✅ 현재 연결됨':'⚠️ 연결되지 않음 — URL을 입력하고 연결 버튼을 누르세요'}
+        </div>
+        <div class="modal-actions" style="margin-top:20px">
+            <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+            ${syncUrl?'<button class="btn btn-cancel" onclick="disconnectSync()" style="color:#dc2626;border-color:#fecaca">연결 해제</button>':''}
+            <button class="btn btn-primary" id="syncConnectBtn" onclick="connectSync()">연결</button>
+        </div>
+    `);
+}
+
+// 클라우드에서 받은 데이터가 유효한 대시보드 형식인지 검증
+function isValidDashboardData(d){
+    return d && typeof d==='object' && d.company && Array.isArray(d.teams);
+}
+
+async function connectSync(){
+    const url=document.getElementById('m_syncUrl').value.trim();
+    if(!url){showToast('URL을 입력하세요','error');return;}
+    if(!url.startsWith('https://script.google.com/')){
+        showToast('Google Apps Script URL이 아닙니다','error');return;
+    }
+    const btn=document.getElementById('syncConnectBtn');
+    const resultDiv=document.getElementById('syncTestResult');
+    btn.textContent='연결 중...';btn.disabled=true;
+    resultDiv.style.background='#FEF9C3';resultDiv.style.color='#CA8A04';
+    resultDiv.textContent='🔄 연결 테스트 중...';
+    updateSyncUI('syncing','연결 중...');
+    try{
+        const json = await jsonpCall(url, {action:'read'});
+        if(!json.success) throw new Error(json.error||'API 오류');
+        syncUrl=url;
+        localStorage.setItem(SYNC_URL_KEY,url);
+        // 클라우드 데이터가 유효한 대시보드 형식이면 불러오기, 아니면 현재 데이터 업로드
+        if(json.data && isValidDashboardData(json.data)){
+            DATA=json.data;
+            localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));
+            renderTabs();renderContent();
+            showToast('클라우드 데이터를 불러왔습니다!','success');
+        } else {
+            await pushToCloud();
+            showToast('현재 데이터를 클라우드에 업로드했습니다!','success');
+        }
+        updateSyncUI('connected','클라우드 연결됨');
+        closeModal();
+    }catch(e){
+        updateSyncUI('error','연결 실패');
+        resultDiv.style.background='#fef2f2';resultDiv.style.color='#dc2626';
+        resultDiv.innerHTML='❌ 연결 실패: '+e.message+'<br><br><strong>확인사항:</strong><br>• Apps Script를 <strong>새 버전</strong>으로 재배포했는지<br>• 액세스 권한이 <strong>모든 사용자(Anyone)</strong>인지<br>• URL이 <code>/exec</code>으로 끝나는지';
+        btn.textContent='다시 시도';btn.disabled=false;
+    }
+}
+
+function disconnectSync(){
+    syncUrl='';
+    localStorage.removeItem(SYNC_URL_KEY);
+    updateSyncUI('','로컬 모드');
+    showToast('클라우드 연결이 해제되었습니다','info');
+    closeModal();
+}
+
+// 숨겨진 form + iframe POST로 저장 (CORS 우회 + 데이터 크기 제한 없음)
+function pushToCloud(){
+    if(!syncUrl||isSyncing)return;
+    isSyncing=true;
+    const btn=document.getElementById('syncRefreshBtn');
+    btn.classList.add('spinning');
+    updateSyncUI('syncing','저장 중...');
+    try{
+        const payload = JSON.stringify({data:DATA,editor:'dashboard',action:'save'});
+        // 동적 form 생성 → 숨겨진 iframe으로 POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = syncUrl;
+        form.target = 'syncFrame'; // 숨겨진 iframe으로 전송
+        form.style.display = 'none';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'payload';
+        input.value = payload;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+        // iframe 로드 완료 시 성공 처리
+        const frame = document.getElementById('syncFrame');
+        const onDone = ()=>{
+            frame.removeEventListener('load', onDone);
+            isSyncing=false;
+            btn.classList.remove('spinning');
+            updateSyncUI('connected','클라우드 저장됨');
+        };
+        frame.addEventListener('load', onDone);
+        // 타임아웃 안전장치 (10초)
+        setTimeout(()=>{
+            isSyncing=false;
+            btn.classList.remove('spinning');
+            updateSyncUI('connected','클라우드 연결됨');
+        }, 10000);
+    }catch(e){
+        isSyncing=false;
+        btn.classList.remove('spinning');
+        updateSyncUI('error','저장 실패');
+        console.error('Sync push error:',e);
+    }
+}
+
+async function pullFromCloud(){
+    if(!syncUrl||isSyncing)return;
+    isSyncing=true;
+    const btn=document.getElementById('syncRefreshBtn');
+    btn.classList.add('spinning');
+    updateSyncUI('syncing','동기화 중...');
+    try{
+        const json = await jsonpCall(syncUrl, {action:'read'});
+        if(json.success && json.data && isValidDashboardData(json.data)){
+            DATA=json.data;
+            localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));
+            renderTabs();renderContent();
+            updateSyncUI('connected','클라우드 연결됨');
+            showToast('최신 데이터를 불러왔습니다','success');
+        } else {
+            updateSyncUI('connected','클라우드 연결됨');
+        }
+    }catch(e){
+        updateSyncUI('error','동기화 실패');
+        showToast('동기화 실패: '+e.message,'error');
+    }finally{
+        isSyncing=false;
+        btn.classList.remove('spinning');
+    }
+}
+
+function manualSync(){
+    if(syncUrl) pullFromCloud();
+    else openSyncModal();
+}
+
+// ===== EDIT MODE =====
+function toggleEditMode(){
+    editMode = !editMode;
+    document.body.classList.toggle('edit-mode', editMode);
+    document.getElementById('editToggle').classList.toggle('active', editMode);
+    document.getElementById('editToggle').innerHTML = editMode
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg> 편집 완료'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> 편집 모드';
+    renderTabs();
+    renderContent();
+}
+
+// ===== MODAL =====
+function openModal(html){
+    document.getElementById('modalContent').innerHTML=html;
+    document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ===== TABS =====
+function renderTabs(){
+    const bar=document.getElementById('tabBar');
+    let h=`<button class="tab-btn ${activeTab==='overview'?'active':''}" onclick="switchTab('overview')"><span class="tab-emoji">📊</span>전체 현황</button>`;
+    DATA.teams.forEach(t=>{
+        h+=`<button class="tab-btn ${activeTab===t.id?'active':''}" onclick="switchTab('${t.id}')"><span class="tab-emoji">${t.emoji}</span>${t.name}</button>`;
+    });
+    h+=`<button class="add-team-btn" onclick="openAddTeamModal()">+ 팀 추가</button>`;
+    bar.innerHTML=h;
+}
+
+function switchTab(id){ activeTab=id; selectedQuarter='all'; renderTabs(); renderContent(); }
+function selectQuarter(q){ selectedQuarter=(selectedQuarter===q)?'all':q; renderContent(); }
+
+// ===== RENDER =====
+function renderContent(){
+    const main=document.getElementById('mainContent');
+    if(activeTab==='overview') main.innerHTML=renderOverview();
+    else{
+        const team=DATA.teams.find(t=>t.id===activeTab);
+        if(team) main.innerHTML=renderTeamPage(team);
+    }
+    // animate
+    setTimeout(()=>{
+        document.querySelectorAll('.progress-fill[data-target],.mini-progress-fill[data-target]').forEach(b=>{b.style.width=b.dataset.target+'%';});
+    },100);
+}
+
+function renderOverview(){
+    const d=DATA.company;
+    const pct=d.annualTarget>0?Math.round((d.annualCurrent/d.annualTarget)*100):0;
+    const remaining=d.annualTarget-d.annualCurrent;
+    const now=new Date();
+    const rm=12-now.getMonth();
+    const monthlyNeeded=(remaining/(rm>0?rm:1)).toFixed(2);
+    const circumference=534.07;
+    const offset=circumference-(circumference*pct/100);
+
+    let teamCards='';
+    DATA.teams.forEach(t=>{
+        const c=COLORS[t.colorIdx%COLORS.length];
+        const p=t.mainTarget>0?Math.round((t.mainCurrent/t.mainTarget)*100):0;
+        teamCards+=`
+        <div class="team-overview-card" onclick="switchTab('${t.id}')">
+            <div class="card-accent" style="background:${c.grad}"></div>
+            <div class="team-name"><span class="team-emoji">${t.emoji}</span>${t.name}</div>
+            <div class="team-main-goal">${t.mainGoal}</div>
+            <div class="team-metric"><span class="team-metric-value" style="color:${c.main}">${t.mainCurrent}</span><span class="team-metric-unit">${t.mainUnit} / ${t.mainTarget}${t.mainUnit}</span></div>
+            <div class="mini-progress"><div class="mini-progress-fill" style="width:0%;background:${c.grad}" data-target="${p}"></div></div>
+            <div class="mini-progress-label"><span style="color:${c.main}">${p}%</span><span style="color:var(--gray-400)">목표</span></div>
+        </div>`;
+    });
+
+    let quarterHtml='';
+    const qColors=['green','brown','teal','sage'];
+    d.quarters.forEach((q,i)=>{
+        const qp=q.target>0?Math.round((q.current/q.target)*100):0;
+        quarterHtml+=`
+        <div style="margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px">
+                <span style="font-size:14px;font-weight:600;color:var(--gray-700)">${q.label}</span>
+                <span style="font-size:13px;color:var(--gray-400)"><strong style="color:var(--gray-700)">${q.current}억</strong> / ${q.target}억</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill ${qColors[i]}" style="width:0%" data-target="${qp}"></div></div>
+            <div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-top:6px;text-align:right">${qp}%${q.current===0&&i>0?' — 예정':''}</div>
+        </div>`;
+    });
+
+    function calcDDay(t){return Math.ceil((t-now)/864e5);}
+    const ddQ2=calcDDay(new Date(2026,5,30));
+    const ddH2=calcDDay(new Date(2026,6,1));
+    const ddY=calcDDay(new Date(2026,11,31));
+
+    const milestones=[1,3,5,10,15,20];
+    const curVal=d.annualCurrent;
+    let milestoneHtml='';
+    let fillPct=0;
+    milestones.forEach((m,i)=>{
+        const reached=curVal>=m;
+        const isNext=!reached&&(i===0||curVal>=milestones[i-1]);
+        const dotCls=reached?'reached':isNext?'current':'';
+        const lblCls=reached||isNext?'active':'';
+        if(reached) fillPct=((i+0.5)/milestones.length)*100;
+        else if(isNext) fillPct=((i)/milestones.length)*100;
+        milestoneHtml+=`<div class="milestone-point"><div class="milestone-dot ${dotCls}"></div><div class="milestone-amount ${lblCls}">${m}억</div><div class="milestone-label ${lblCls}">${reached?'달성!':isNext?'다음 목표':''}</div></div>`;
+    });
+
+    const hour=now.getHours();
+    let greet='좋은 아침입니다!';if(hour>=12&&hour<18)greet='좋은 오후입니다!';else if(hour>=18)greet='오늘도 수고하셨습니다!';
+
+    const quotes=[{t:"작은 진전도 진전이다. 멈추지 않는 한, 느려도 괜찮다.",a:"— 팀 전체에게"},{t:"목표는 방향이고, 실행은 연료다. 오늘의 한 걸음이 내일의 도약이 된다.",a:"— 우리의 다짐"},{t:"함께라면, 불가능해 보이는 숫자도 현실이 됩니다.",a:"— 팀 전체에게"},{t:"어제보다 오늘 1%만 더 나아지면, 1년 후엔 37배가 됩니다.",a:"— 복리의 법칙"},{t:"큰 목표는 매일의 작은 승리로 이루어진다.",a:"— 우리의 약속"}];
+    const qt=quotes[now.getDate()%quotes.length];
+
+    const bannerQuotes=[
+        "작은 실행이 큰 계획을 이긴다.",
+        "어제보다 1%만 더, 그게 우리의 공식이다.",
+        "목표는 꿈에 마감일을 붙인 것이다.",
+        "지금 이 순간의 노력이 내일의 성과를 만든다.",
+        "불가능은 아직 하지 않은 일일 뿐이다.",
+        "함께라면, 먼 길도 빠르게 갈 수 있다.",
+        "탁월함은 행동이 아니라 습관이다.",
+        "매일 조금씩, 그러나 절대 멈추지 않는다.",
+        "우리가 흘린 땀은 거짓말을 하지 않는다.",
+        "성장은 편안함 바깥에서 시작된다.",
+        "오늘 뿌린 씨앗이 내일의 수확이 된다.",
+        "최고의 팀은 최고의 결과를 만든다.",
+        "한 발짝의 용기가 천 리 길을 연다.",
+        "포기하지 않는 한, 실패는 없다.",
+        "큰 목표는 작은 승리의 연속이다.",
+        "될 때까지 하면, 반드시 된다.",
+        "기회는 준비된 팀에게 찾아온다.",
+        "모든 전문가는 한때 초보자였다.",
+        "과정을 즐기면, 결과는 따라온다.",
+        "우리의 한계는 우리가 정하는 것이다.",
+        "오늘의 도전이 내일의 자산이 된다.",
+        "느려도 괜찮다, 방향이 맞으면 된다.",
+        "위기 속에서 가장 큰 기회가 태어난다.",
+        "실행이 전략을 이긴다.",
+        "꾸준함이 재능을 이긴다.",
+        "지금 시작하기에 가장 좋은 때이다.",
+        "결과는 노력을 배신하지 않는다.",
+        "함께 걸으면, 아무도 지치지 않는다.",
+        "성공은 매일의 작은 선택에서 시작된다.",
+        "우리는 어제보다 더 강한 팀이다.",
+        "목표를 향한 여정 자체가 성장이다."
+    ];
+    const todayBanner=bannerQuotes[(now.getFullYear()*1000+now.getMonth()*32+now.getDate())%bannerQuotes.length];
+
+    return `
+    <div class="banner"><div class="banner-content">
+        <div class="banner-greeting">${greet} 오늘의 우리 목표를 확인하세요.</div>
+        <div class="banner-headline">${todayBanner}</div>
+        <div class="banner-sub">${d.annualTarget}억 매출 달성, 함께 만들어가는 중입니다.</div>
+    </div></div>
+
+    <div class="team-overview-grid">${teamCards}</div>
+
+    <div class="stats-row">
+        <div class="stat-card" style="position:relative">
+            <button class="edit-btn" onclick="event.stopPropagation();openCompanyModal()">✏️</button>
+            <div class="stat-label"><span class="stat-icon">🎯</span> 연간 목표</div>
+            <div class="stat-value">${d.annualTarget}<span class="stat-unit">억</span></div>
+            <div class="stat-change caution">2026년 12월 31일까지</div>
+        </div>
+        <div class="stat-card"><div class="stat-label"><span class="stat-icon">📈</span> 현재 달성</div><div class="stat-value">${d.annualCurrent}<span class="stat-unit">억</span></div><div class="stat-change positive">▲ 목표의 ${pct}% 달성</div></div>
+        <div class="stat-card"><div class="stat-label"><span class="stat-icon">💰</span> 남은 매출</div><div class="stat-value">${remaining}<span class="stat-unit">억</span></div><div class="stat-change caution">연말까지 달성 필요</div></div>
+        <div class="stat-card"><div class="stat-label"><span class="stat-icon">⚡</span> 2분기 목표</div><div class="stat-value">${d.q2Target}<span class="stat-unit">억</span></div><div class="stat-change caution">6월 30일까지</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+        <div class="card" style="margin-bottom:0">
+            <div class="card-header"><div class="card-title">연간 매출 달성률</div><div class="card-badge">2026</div></div>
+            <div style="display:flex;align-items:center;gap:36px;">
+                <div style="position:relative;width:200px;height:200px;flex-shrink:0">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#50CC93"/><stop offset="100%" stop-color="#AA9587"/></linearGradient></defs>
+                        <circle cx="100" cy="100" r="85" fill="none" stroke="var(--gray-100)" stroke-width="12"/>
+                        <circle cx="100" cy="100" r="85" fill="none" stroke="url(#grad1)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 2s"/>
+                    </svg>
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+                        <div style="font-size:42px;font-weight:900;letter-spacing:-.03em;line-height:1">${pct}<span style="font-size:20px;font-weight:600;color:var(--gray-400)">%</span></div>
+                        <div style="font-size:12px;color:var(--gray-400);margin-top:4px;font-weight:500">달성률</div>
+                    </div>
+                </div>
+                <div style="flex:1">
+                    <div class="annual-detail-item" style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-100)"><span style="font-size:14px;color:var(--gray-500)">목표 매출</span><span style="font-size:16px;font-weight:700">${d.annualTarget}억원</span></div>
+                    <div class="annual-detail-item" style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-100)"><span style="font-size:14px;color:var(--gray-500)">현재 달성</span><span style="font-size:16px;font-weight:700;color:var(--primary)">${d.annualCurrent}억원</span></div>
+                    <div class="annual-detail-item" style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-100)"><span style="font-size:14px;color:var(--gray-500)">잔여 금액</span><span style="font-size:16px;font-weight:700">${remaining}억원</span></div>
+                    <div class="annual-detail-item" style="display:flex;justify-content:space-between;padding:14px 0"><span style="font-size:14px;color:var(--gray-500)">월 평균 필요</span><span style="font-size:16px;font-weight:700">${monthlyNeeded}억원</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+            <div class="card-header"><div class="card-title">분기별 매출 진행률</div><div class="card-badge">Q1-Q4</div></div>
+            ${quarterHtml}
+        </div>
+    </div>
+
+    <div class="grid-3col">
+        <div class="dday-card"><div class="dday-label">2분기 마감까지</div><div class="dday-number blue">D-${ddQ2}</div><div class="dday-sub">D-Day</div></div>
+        <div class="dday-card"><div class="dday-label">하반기 시작까지</div><div class="dday-number purple">D-${ddH2}</div><div class="dday-sub">D-Day</div></div>
+        <div class="dday-card"><div class="dday-label">연말 마감까지</div><div class="dday-number rose">D-${ddY}</div><div class="dday-sub">D-Day</div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><div class="card-title">매출 마일스톤</div><div class="card-badge">로드맵</div></div>
+        <div class="milestone-track">
+            <div class="milestone-line"><div class="milestone-line-fill" style="width:${fillPct}%"></div></div>
+            <div class="milestone-points">${milestoneHtml}</div>
+        </div>
+    </div>
+
+    <div class="quote-card"><div class="quote-icon">"</div><div class="quote-text">${qt.t}</div><div class="quote-author">${qt.a}</div></div>`;
+}
+
+function renderTeamPage(team){
+    const c=COLORS[team.colorIdx%COLORS.length];
+    const qColorCls=['green','brown','teal','sage'];
+    const qLabels=['Q1','Q2','Q3','Q4'];
+    const sq=selectedQuarter; // 'all' or 'Q1'..'Q4'
+
+    // Quarters
+    let quarterHtml='';
+    if(team.quarters && team.quarters.length){
+        const now=new Date();
+        const currentQ=Math.floor(now.getMonth()/3);
+        team.quarters.forEach((q,i)=>{
+            const qKey=qLabels[i];
+            const isCurrent=i===currentQ;
+            const isPast=i<currentQ;
+            const isSelected=sq===qKey;
+            const statusTag=isCurrent?'<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:#EEFBF4;color:#3BA876;margin-left:8px">진행 중</span>'
+                :isPast?(q.percent>=80?'<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:#EEFBF4;color:#3BA876;margin-left:8px">완료</span>':'<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:#fff7ed;color:#ea580c;margin-left:8px">미달</span>')
+                :'';
+            const selBorder=isSelected?c.main:(isCurrent?'#50CC93':'var(--gray-200)');
+            const selBg=isSelected?c.bg:(isCurrent?'#FAFFFE':'white');
+            const selShadow=isSelected?'box-shadow:0 0 0 3px '+c.main+'22;':(isCurrent?'box-shadow:0 0 0 3px rgba(80,204,147,.1);':'');
+            quarterHtml+=`
+            <div onclick="selectQuarter('${qKey}')" style="padding:20px 24px;background:${selBg};border:2px solid ${selBorder};border-radius:14px;${selShadow}position:relative;cursor:pointer;transition:all .2s;">
+                <button class="edit-btn" onclick="event.stopPropagation();openQuarterModal('${team.id}',${i})">✏️</button>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <div style="display:flex;align-items:center">
+                        <span style="font-size:14px;font-weight:700;color:${isSelected?c.main:'var(--gray-800)'}">${q.label}</span>
+                        ${isSelected?'<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:'+c.bg+';color:'+c.main+';margin-left:8px">선택됨</span>':statusTag}
+                    </div>
+                    <span style="font-size:13px;color:var(--gray-400)"><strong style="color:var(--gray-700)">${q.current}</strong> / ${q.target}</span>
+                </div>
+                <div class="progress-track" style="height:12px"><div class="progress-fill ${qColorCls[i%4]}" style="width:0%" data-target="${q.percent}"></div></div>
+                <div style="font-size:12px;font-weight:700;color:${c.main};margin-top:6px;text-align:right">${q.percent}%</div>
+            </div>`;
+        });
+    }
+
+    // Filter helper
+    const matchQ=(item)=> sq==='all' || (item.quarter||'all')==='all' || (item.quarter||'')=== sq;
+
+    // KPIs
+    const filteredKpis=team.kpis.map((k,i)=>({...k,_idx:i})).filter(matchQ);
+    let kpiHtml='';
+    if(filteredKpis.length===0 && sq!=='all'){
+        kpiHtml='<div style="padding:20px;text-align:center;color:var(--gray-400);font-size:14px;grid-column:1/-1">이 분기에 해당하는 KPI가 없습니다.</div>';
+    } else {
+        filteredKpis.forEach(k=>{
+            const i=k._idx;
+            const qTag=(k.quarter&&k.quarter!=='all')?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+c.bg+';color:'+c.main+';margin-left:6px">'+k.quarter+'</span>':'';
+            kpiHtml+=`
+            <div class="kpi-card">
+                <button class="edit-btn" onclick="event.stopPropagation();openKpiModal('${team.id}',${i})">✏️</button>
+                <button class="delete-btn" onclick="event.stopPropagation();deleteKpi('${team.id}',${i})">🗑</button>
+                <div class="kpi-title">${k.title}${qTag}</div>
+                <div class="kpi-row"><div class="kpi-value" style="color:${c.main}">${k.current}</div><div class="kpi-target">${k.target}</div></div>
+                <div class="kpi-progress"><div class="progress-track"><div class="progress-fill ${c.cls}" style="width:0%" data-target="${k.percent}"></div></div></div>
+            </div>`;
+        });
+    }
+
+    // Goals
+    const filteredGoals=team.goals.map((g,i)=>({...g,_idx:i})).filter(matchQ);
+    let goalHtml='';
+    if(filteredGoals.length===0 && sq!=='all'){
+        goalHtml='<div style="padding:20px;text-align:center;color:var(--gray-400);font-size:14px">이 분기에 해당하는 세부 목표가 없습니다.</div>';
+    } else {
+        filteredGoals.forEach(g=>{
+            const i=g._idx;
+            const st=STATUS_OPTIONS.find(s=>s.v===g.status)||STATUS_OPTIONS[0];
+            const qTag=(g.quarter&&g.quarter!=='all')?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+c.bg+';color:'+c.main+';margin-left:8px">'+g.quarter+'</span>':'';
+            goalHtml+=`
+            <div class="goal-item">
+                <button class="edit-btn" onclick="event.stopPropagation();openGoalModal('${team.id}',${i})">✏️</button>
+                <button class="delete-btn" onclick="event.stopPropagation();deleteGoal('${team.id}',${i})">🗑</button>
+                <div class="goal-item-header"><div class="goal-item-title">${g.title}${qTag}</div><div class="goal-status ${g.status}">${st.l}</div></div>
+                <div class="goal-item-meta"><span>목표: <strong>${g.target}</strong></span><span>현재: <strong>${g.current}</strong></span><span>마감: <strong>${g.deadline}</strong></span></div>
+                <div class="progress-track"><div class="progress-fill ${c.cls}" style="width:0%" data-target="${g.percent}"></div></div>
+            </div>`;
+        });
+    }
+
+    // Filter indicator
+    const filterBar=sq!=='all'?`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:12px 18px;background:${c.bg};border-radius:10px;border:1px solid ${c.main}33">
+        <span style="font-size:13px;font-weight:700;color:${c.main}">${sq} 필터 적용 중</span>
+        <span style="font-size:12px;color:var(--gray-500)">해당 분기의 KPI와 목표만 표시됩니다</span>
+        <button onclick="selectQuarter('all')" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid ${c.main};background:white;color:${c.main};font-size:12px;font-weight:600;cursor:pointer">전체 보기</button>
+    </div>`:'';
+
+    const kpiTitle=sq!=='all'?`핵심 KPI — ${sq}`:'핵심 KPI';
+    const goalTitle=sq!=='all'?`세부 목표 — ${sq}`:'세부 목표';
+
+    return `
+    <div class="team-page-header" style="position:relative">
+        <div class="team-page-icon" style="background:${c.bg}">${team.emoji}</div>
+        <div><div class="team-page-title">${team.name}</div><div class="team-page-desc">${team.desc}</div></div>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+            <button class="edit-btn" style="position:static;display:none" onclick="openEditTeamModal('${team.id}')">✏️</button>
+            <button class="delete-btn" style="position:static;display:none" onclick="deleteTeam('${team.id}')">🗑</button>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:28px">
+        <div class="card-header"><div class="card-title">분기별 목표 & 달성</div><div class="card-badge" style="cursor:pointer" onclick="selectQuarter('all')">전체 보기</div></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">${quarterHtml}</div>
+    </div>
+
+    ${filterBar}
+
+    <div class="card-header" style="margin-bottom:16px"><div class="card-title">${kpiTitle}</div></div>
+    <div class="kpi-grid">${kpiHtml}</div>
+    <div class="add-btn" onclick="openKpiModal('${team.id}',-1)">+ KPI 추가</div>
+
+    <div class="card-header" style="margin-top:28px;margin-bottom:16px"><div class="card-title">${goalTitle}</div></div>
+    <div class="goal-list">${goalHtml}</div>
+    <div class="add-btn" onclick="openGoalModal('${team.id}',-1)">+ 목표 추가</div>`;
+}
+
+// ===== MODALS =====
+function openCompanyModal(){
+    const d=DATA.company;
+    openModal(`
+        <div class="modal-title">회사 목표 수정</div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">연간 매출 목표 (억)</label><input class="form-input" id="m_at" type="number" step="0.1" value="${d.annualTarget}"></div>
+            <div class="form-group"><label class="form-label">현재 달성 (억)</label><input class="form-input" id="m_ac" type="number" step="0.1" value="${d.annualCurrent}"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">2분기 목표 (억)</label><input class="form-input" id="m_q2t" type="number" step="0.1" value="${d.q2Target}"></div>
+            <div class="form-group"><label class="form-label">2분기 현재 (억)</label><input class="form-input" id="m_q2c" type="number" step="0.1" value="${d.q2Current}"></div>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--gray-200);margin:16px 0">
+        <div style="font-size:14px;font-weight:700;margin-bottom:12px">분기별 목표</div>
+        ${d.quarters.map((q,i)=>`
+        <div class="form-row" style="margin-bottom:8px">
+            <div class="form-group" style="margin-bottom:0"><label class="form-label">${q.label} 목표</label><input class="form-input" id="m_qt${i}" type="number" step="0.1" value="${q.target}"></div>
+            <div class="form-group" style="margin-bottom:0"><label class="form-label">${q.label} 현재</label><input class="form-input" id="m_qc${i}" type="number" step="0.1" value="${q.current}"></div>
+        </div>`).join('')}
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" onclick="saveCompany()">저장</button>
+        </div>
+    `);
+}
+
+function saveCompany(){
+    DATA.company.annualTarget=parseFloat(document.getElementById('m_at').value)||0;
+    DATA.company.annualCurrent=parseFloat(document.getElementById('m_ac').value)||0;
+    DATA.company.q2Target=parseFloat(document.getElementById('m_q2t').value)||0;
+    DATA.company.q2Current=parseFloat(document.getElementById('m_q2c').value)||0;
+    DATA.company.quarters.forEach((q,i)=>{
+        q.target=parseFloat(document.getElementById('m_qt'+i).value)||0;
+        q.current=parseFloat(document.getElementById('m_qc'+i).value)||0;
+    });
+    saveData();closeModal();renderContent();
+}
+
+function openAddTeamModal(){
+    openModal(`
+        <div class="modal-title">새 팀 추가</div>
+        <div class="form-group"><label class="form-label">팀 이름</label><input class="form-input" id="m_tn" placeholder="예: 마케팅팀"></div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">이모지</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">${EMOJIS.map(e=>`<button style="font-size:24px;padding:6px 10px;border:1.5px solid var(--gray-200);border-radius:8px;background:white;cursor:pointer" onclick="document.getElementById('m_te').value='${e}';this.parentElement.querySelectorAll('button').forEach(b=>b.style.borderColor='var(--gray-200)');this.style.borderColor='var(--primary)'">${e}</button>`).join('')}</div>
+                <input type="hidden" id="m_te" value="🚀">
+            </div>
+            <div class="form-group"><label class="form-label">테마 색상</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">${COLORS.map((c,i)=>`<button style="width:32px;height:32px;border-radius:8px;background:${c.main};border:2px solid transparent;cursor:pointer" onclick="document.getElementById('m_tc').value=${i};this.parentElement.querySelectorAll('button').forEach(b=>b.style.borderColor='transparent');this.style.borderColor='var(--gray-900)'"></button>`).join('')}</div>
+                <input type="hidden" id="m_tc" value="0">
+            </div>
+        </div>
+        <div class="form-group"><label class="form-label">팀 설명</label><input class="form-input" id="m_td" placeholder="예: 디지털 마케팅 및 브랜딩"></div>
+        <div class="form-group"><label class="form-label">메인 목표</label><input class="form-input" id="m_tg" placeholder="예: 월 리드 200건 확보"></div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">현재 달성</label><input class="form-input" id="m_tmc" type="number" step="0.1" value="0"></div>
+            <div class="form-group"><label class="form-label">목표 수치</label><input class="form-input" id="m_tmt" type="number" step="0.1" value="100"></div>
+        </div>
+        <div class="form-group"><label class="form-label">단위</label><input class="form-input" id="m_tmu" placeholder="예: 건, 억, %, 점" value="건"></div>
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" onclick="addTeam()">추가</button>
+        </div>
+    `);
+}
+
+function addTeam(){
+    const name=document.getElementById('m_tn').value.trim();
+    if(!name){alert('팀 이름을 입력해주세요.');return;}
+    const id='team_'+Date.now();
+    DATA.teams.push({
+        id, name, emoji:document.getElementById('m_te').value,
+        colorIdx:parseInt(document.getElementById('m_tc').value),
+        desc:document.getElementById('m_td').value,
+        mainGoal:document.getElementById('m_tg').value,
+        mainCurrent:parseFloat(document.getElementById('m_tmc').value)||0,
+        mainTarget:parseFloat(document.getElementById('m_tmt').value)||0,
+        mainUnit:document.getElementById('m_tmu').value||'건',
+        quarters:[
+            {label:'Q1 (1~3월)',target:'',current:'',percent:0},
+            {label:'Q2 (4~6월)',target:'',current:'',percent:0},
+            {label:'Q3 (7~9월)',target:'',current:'',percent:0},
+            {label:'Q4 (10~12월)',target:'',current:'',percent:0}
+        ],
+        kpis:[],goals:[]
+    });
+    saveData();closeModal();activeTab=id;renderTabs();renderContent();
+}
+
+function openEditTeamModal(teamId){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    openModal(`
+        <div class="modal-title">팀 정보 수정</div>
+        <div class="form-group"><label class="form-label">팀 이름</label><input class="form-input" id="m_tn" value="${t.name}"></div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">이모지</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">${EMOJIS.map(e=>`<button style="font-size:24px;padding:6px 10px;border:1.5px solid ${e===t.emoji?'var(--primary)':'var(--gray-200)'};border-radius:8px;background:white;cursor:pointer" onclick="document.getElementById('m_te').value='${e}';this.parentElement.querySelectorAll('button').forEach(b=>b.style.borderColor='var(--gray-200)');this.style.borderColor='var(--primary)'">${e}</button>`).join('')}</div>
+                <input type="hidden" id="m_te" value="${t.emoji}">
+            </div>
+            <div class="form-group"><label class="form-label">테마 색상</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">${COLORS.map((c,i)=>`<button style="width:32px;height:32px;border-radius:8px;background:${c.main};border:2px solid ${i===t.colorIdx?'var(--gray-900)':'transparent'};cursor:pointer" onclick="document.getElementById('m_tc').value=${i};this.parentElement.querySelectorAll('button').forEach(b=>b.style.borderColor='transparent');this.style.borderColor='var(--gray-900)'"></button>`).join('')}</div>
+                <input type="hidden" id="m_tc" value="${t.colorIdx}">
+            </div>
+        </div>
+        <div class="form-group"><label class="form-label">팀 설명</label><input class="form-input" id="m_td" value="${t.desc}"></div>
+        <div class="form-group"><label class="form-label">메인 목표</label><input class="form-input" id="m_tg" value="${t.mainGoal}"></div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">현재 달성</label><input class="form-input" id="m_tmc" type="number" step="0.1" value="${t.mainCurrent}"></div>
+            <div class="form-group"><label class="form-label">목표 수치</label><input class="form-input" id="m_tmt" type="number" step="0.1" value="${t.mainTarget}"></div>
+        </div>
+        <div class="form-group"><label class="form-label">단위</label><input class="form-input" id="m_tmu" value="${t.mainUnit}"></div>
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" onclick="saveTeamEdit('${teamId}')">저장</button>
+        </div>
+    `);
+}
+
+function saveTeamEdit(teamId){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    t.name=document.getElementById('m_tn').value.trim();
+    t.emoji=document.getElementById('m_te').value;
+    t.colorIdx=parseInt(document.getElementById('m_tc').value);
+    t.desc=document.getElementById('m_td').value;
+    t.mainGoal=document.getElementById('m_tg').value;
+    t.mainCurrent=parseFloat(document.getElementById('m_tmc').value)||0;
+    t.mainTarget=parseFloat(document.getElementById('m_tmt').value)||0;
+    t.mainUnit=document.getElementById('m_tmu').value||'건';
+    saveData();closeModal();renderTabs();renderContent();
+}
+
+function deleteTeam(teamId){
+    if(!confirm('이 팀을 삭제하시겠습니까?'))return;
+    DATA.teams=DATA.teams.filter(t=>t.id!==teamId);
+    saveData();activeTab='overview';renderTabs();renderContent();
+}
+
+function openKpiModal(teamId,idx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    const isNew=idx<0;
+    const k=isNew?{title:'',current:'',target:'',percent:0,quarter:selectedQuarter!=='all'?selectedQuarter:'all'}:t.kpis[idx];
+    const qOpts=['all','Q1','Q2','Q3','Q4'].map(q=>`<option value="${q}" ${(k.quarter||'all')===q?'selected':''}>${q==='all'?'전체 (연간)':q}</option>`).join('');
+    openModal(`
+        <div class="modal-title">${isNew?'KPI 추가':'KPI 수정'}</div>
+        <div class="form-group"><label class="form-label">KPI 이름</label><input class="form-input" id="m_kt" value="${k.title}" placeholder="예: 월 매출"></div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">현재 수치</label><input class="form-input" id="m_kc" value="${k.current}" placeholder="예: 3,200만원"></div>
+            <div class="form-group"><label class="form-label">목표 수치</label><input class="form-input" id="m_kg" value="${k.target}" placeholder="예: 목표 1억"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">달성률 (%)</label><input class="form-input" id="m_kp" type="number" min="0" max="100" value="${k.percent}"></div>
+            <div class="form-group"><label class="form-label">해당 분기</label><select class="form-select" id="m_kq">${qOpts}</select></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" onclick="saveKpi('${teamId}',${idx})">${isNew?'추가':'저장'}</button>
+        </div>
+    `);
+}
+
+function saveKpi(teamId,idx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    const obj={title:document.getElementById('m_kt').value,current:document.getElementById('m_kc').value,target:document.getElementById('m_kg').value,percent:parseFloat(document.getElementById('m_kp').value)||0,quarter:document.getElementById('m_kq').value};
+    if(idx<0) t.kpis.push(obj); else t.kpis[idx]=obj;
+    saveData();closeModal();renderContent();
+}
+
+function deleteKpi(teamId,idx){
+    if(!confirm('이 KPI를 삭제하시겠습니까?'))return;
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    t.kpis.splice(idx,1);saveData();renderContent();
+}
+
+function openGoalModal(teamId,idx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    const isNew=idx<0;
+    const g=isNew?{title:'',status:'on-track',target:'',current:'',deadline:'',percent:0,quarter:selectedQuarter!=='all'?selectedQuarter:'all'}:t.goals[idx];
+    const qOpts=['all','Q1','Q2','Q3','Q4'].map(q=>`<option value="${q}" ${(g.quarter||'all')===q?'selected':''}>${q==='all'?'전체 (연간)':q}</option>`).join('');
+    openModal(`
+        <div class="modal-title">${isNew?'목표 추가':'목표 수정'}</div>
+        <div class="form-group"><label class="form-label">목표명</label><input class="form-input" id="m_gt" value="${g.title}" placeholder="예: 신규 고객 100건 확보"></div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">상태</label>
+                <select class="form-select" id="m_gs">${STATUS_OPTIONS.map(s=>`<option value="${s.v}" ${g.status===s.v?'selected':''}>${s.l}</option>`).join('')}</select>
+            </div>
+            <div class="form-group"><label class="form-label">해당 분기</label><select class="form-select" id="m_gq">${qOpts}</select></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">목표 수치</label><input class="form-input" id="m_gg" value="${g.target}" placeholder="예: 100건"></div>
+            <div class="form-group"><label class="form-label">현재 수치</label><input class="form-input" id="m_gc" value="${g.current}" placeholder="예: 45건"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">마감</label><input class="form-input" id="m_gd" value="${g.deadline}" placeholder="예: Q2, 12월"></div>
+            <div class="form-group"><label class="form-label">달성률 (%)</label><input class="form-input" id="m_gp" type="number" min="0" max="100" value="${g.percent}"></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" onclick="saveGoal('${teamId}',${idx})">${isNew?'추가':'저장'}</button>
+        </div>
+    `);
+}
+
+function saveGoal(teamId,idx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    const obj={title:document.getElementById('m_gt').value,status:document.getElementById('m_gs').value,target:document.getElementById('m_gg').value,current:document.getElementById('m_gc').value,deadline:document.getElementById('m_gd').value,percent:parseFloat(document.getElementById('m_gp').value)||0,quarter:document.getElementById('m_gq').value};
+    if(idx<0) t.goals.push(obj); else t.goals[idx]=obj;
+    saveData();closeModal();renderContent();
+}
+
+function deleteGoal(teamId,idx){
+    if(!confirm('이 목표를 삭제하시겠습니까?'))return;
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    t.goals.splice(idx,1);saveData();renderContent();
+}
+
+// ===== QUARTER MODAL =====
+function openQuarterModal(teamId,idx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t||!t.quarters)return;
+    const q=t.quarters[idx];
+    openModal(`
+        <div class="modal-title">${q.label} 목표 수정</div>
+        <div class="form-group"><label class="form-label">분기 목표</label><input class="form-input" id="m_qqt" value="${q.target}" placeholder="예: 3억, 원가율 38%"></div>
+        <div class="form-group"><label class="form-label">현재 달성</label><input class="form-input" id="m_qqc" value="${q.current}" placeholder="예: 1.2억, 40%"></div>
+        <div class="form-group"><label class="form-label">달성률 (%)</label><input class="form-input" id="m_qqp" type="number" min="0" max="100" value="${q.percent}"></div>
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" onclick="saveQuarter('${teamId}',${idx})">저장</button>
+        </div>
+    `);
+}
+
+function saveQuarter(teamId,idx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t||!t.quarters)return;
+    t.quarters[idx].target=document.getElementById('m_qqt').value;
+    t.quarters[idx].current=document.getElementById('m_qqc').value;
+    t.quarters[idx].percent=parseFloat(document.getElementById('m_qqp').value)||0;
+    saveData();closeModal();renderContent();
+}
+
+// ===== INIT =====
+const now=new Date();
+document.getElementById('currentDate').textContent=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+renderTabs();
+renderContent();
+// 클라우드 연결 상태 확인 및 자동 동기화
+if(syncUrl){
+    updateSyncUI('connected','클라우드 연결됨');
+    pullFromCloud();
+}
+</script>
+</body>
+</html>
