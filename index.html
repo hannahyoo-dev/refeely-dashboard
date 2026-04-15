@@ -384,7 +384,8 @@ localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
 let editMode = false;
 let activeTab = 'overview';
 let selectedQuarter = 'all';
-let syncUrl = localStorage.getItem(SYNC_URL_KEY) || '';
+const DEFAULT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbxsKYQStRCGCQZhjLNuEC77_QK_Eg_yynRKi-xIdwMpIcGIChhF88nS835AP1t6-HF5/exec';
+let syncUrl = localStorage.getItem(SYNC_URL_KEY) || DEFAULT_SYNC_URL;
 let isSyncing = false;
 
 function saveData(){
