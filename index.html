@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2026 Refeely Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2350CC93'/%3E%3Ctext x='50%25' y='54%25' font-family='Arial,sans-serif' font-size='38' font-weight='800' fill='white' text-anchor='middle' dominant-baseline='middle'%3ER%3C/text%3E%3Crect x='34' y='38' width='8' height='8' rx='1' fill='%23C4A882'/%3E%3C/svg%3E">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -27,7 +28,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 /* HEADER */
 .header{background:white;border-bottom:1px solid var(--gray-200);padding:20px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .header-left{display:flex;align-items:center;gap:16px;}
-.logo{width:40px;height:40px;background:linear-gradient(135deg,#50CC93,#3BA876);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:18px;}
+.logo{height:36px;display:flex;align-items:center;}
 .header-title{font-size:20px;font-weight:700;color:var(--gray-900);}
 .header-subtitle{font-size:13px;color:var(--gray-400);}
 .header-right{display:flex;align-items:center;gap:12px;}
@@ -66,8 +67,8 @@ body.edit-mode .add-team-btn{display:block;}
 
 /* CARDS */
 .team-overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;}
-.team-overview-card{background:white;border-radius:var(--radius);padding:24px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
-.team-overview-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.team-overview-card{background:white;border-radius:var(--radius);padding:24px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
+.team-overview-card:hover{box-shadow:0 12px 28px -4px rgba(0,0,0,.12),0 4px 10px -2px rgba(0,0,0,.06);transform:translateY(-6px);border-color:var(--gray-300);}
 .team-overview-card .card-accent{position:absolute;top:0;left:0;right:0;height:4px;}
 .team-name{font-size:15px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:8px;margin-bottom:14px;}
 .team-emoji{font-size:20px;}
@@ -108,8 +109,9 @@ body.edit-mode .add-team-btn{display:block;}
 .kpi-target{font-size:12px;color:var(--gray-400);font-weight:500;}
 .kpi-progress{margin-top:14px;}
 
-.progress-track{width:100%;height:14px;background:var(--gray-100);border-radius:10px;overflow:hidden;}
+.progress-track{width:100%;height:18px;background:var(--gray-100);border-radius:10px;overflow:hidden;position:relative;}
 .progress-fill{height:100%;border-radius:10px;transition:width 1.5s cubic-bezier(.4,0,.2,1);}
+.progress-pct{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:800;color:var(--gray-500);z-index:1;line-height:1;}
 .progress-fill.green{background:linear-gradient(90deg,#50CC93,#6DD9A6);}
 .progress-fill.brown{background:linear-gradient(90deg,#AA9587,#C4B5A9);}
 .progress-fill.teal{background:linear-gradient(90deg,#3BA876,#50CC93);}
@@ -173,6 +175,7 @@ body.edit-mode .add-btn{display:block;}
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
 .modal{background:white;border-radius:20px;padding:32px;width:90%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);}
+.modal.wide{max-width:720px;}
 .modal-title{font-size:20px;font-weight:800;color:var(--gray-900);margin-bottom:24px;}
 .form-group{margin-bottom:18px;}
 .form-label{font-size:13px;font-weight:600;color:var(--gray-600);margin-bottom:6px;display:block;}
@@ -211,21 +214,124 @@ body.edit-mode .add-btn{display:block;}
 .sync-toast.error{background:#dc2626;}
 .sync-toast.info{background:#50CC93;}
 
+/* WEEKLY CHART */
+.kpi-expanded-layout{display:flex;gap:20px;margin-bottom:20px;animation:fadeIn .3s ease;}
+.kpi-expanded-left{flex:0 0 260px;min-width:220px;}
+.kpi-expanded-right{flex:1;min-width:0;background:white;border-radius:var(--radius);padding:28px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);}
+.kpi-others-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:20px;}
+.kpi-others-row .kpi-card{opacity:.85;transition:opacity .2s;}
+.kpi-others-row .kpi-card:hover{opacity:1;}
+.line-chart-container{position:relative;width:100%;height:220px;margin:16px 0;}
+.line-chart-svg{width:100%;height:100%;}
+.line-chart-dot{fill:white;stroke-width:3;cursor:pointer;transition:r .15s;}
+.line-chart-dot:hover{r:7;}
+.line-chart-tooltip{position:absolute;background:var(--gray-800);color:white;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;z-index:10;transform:translate(-50%,-100%);margin-top:-10px;}
+.weekly-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.weekly-stat-card{flex:1;min-width:100px;background:var(--gray-50);border-radius:10px;padding:12px 16px;text-align:center;}
+.weekly-stat-card .stat-label{font-size:11px;color:var(--gray-400);font-weight:600;margin-bottom:4px;}
+.weekly-stat-card .stat-value{font-size:18px;font-weight:800;}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.chart-title{font-size:13px;font-weight:700;color:var(--gray-700);}
+.chart-add-btn{font-size:12px;font-weight:600;color:#3BA876;background:#EEFBF4;border:1px solid #50CC93;border-radius:6px;padding:4px 10px;cursor:pointer;}
+.chart-add-btn:hover{background:#50CC93;color:white;}
+.weekly-data-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:16px;font-size:13px;}
+.weekly-data-table th{text-align:left;padding:8px 12px;font-weight:700;color:var(--gray-500);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--gray-200);}
+.weekly-data-table td{padding:8px 12px;border-bottom:1px solid var(--gray-100);}
+.weekly-data-table tr:last-child td{border-bottom:none;}
+.weekly-data-table .change-cell{font-weight:700;font-size:12px;}
+.weekly-change{display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.weekly-change.up{color:#3BA876;background:#EEFBF4;}
+.weekly-change.down{color:#dc2626;background:#fef2f2;}
+.weekly-change.same{color:var(--gray-400);background:var(--gray-100);}
+.weekly-input-row{display:flex;gap:8px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-200);}
+.weekly-input-row input{flex:1;}
+.weekly-input-row .btn{padding:6px 14px;font-size:12px;}
+
+/* INLINE INPUT + UNIT */
+.input-unit-row{display:flex;gap:6px;align-items:center;}
+.input-unit-row .form-input{flex:1;min-width:0;}
+.input-unit-row .form-select{width:90px;flex-shrink:0;}
+.auto-pct{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;background:var(--gray-50);font-size:13px;color:var(--gray-600);}
+.auto-pct strong{color:#3BA876;font-size:18px;}
+
 /* RESPONSIVE */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:900px){
 .main{padding:20px;}.stats-row{grid-template-columns:repeat(2,1fr);}.grid-3col{grid-template-columns:1fr;}.header{padding:16px 20px;}.tab-bar{padding:0 16px;}
+.kpi-expanded-layout{flex-direction:column;}.kpi-expanded-left{flex:none;width:100%;}
 }
 @media(max-width:600px){
-.stats-row{grid-template-columns:1fr;}
+.stats-row{grid-template-columns:1fr;}.weekly-stats{flex-direction:column;}
 }
+
+/* ===== DARK MODE ===== */
+.dark-toggle{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;transition:all .2s;line-height:1;}
+.dark-toggle:hover{border-color:#50CC93;}
+body.dark-mode{--gray-50:#0f1117;--gray-100:#1a1d27;--gray-200:#2a2d3a;--gray-300:#3a3d4a;--gray-400:#7a7d8a;--gray-500:#9a9daa;--gray-600:#babdca;--gray-700:#dadde8;--gray-800:#eaedfa;--gray-900:#f5f5ff;color:var(--gray-800);background:var(--gray-50);}
+body.dark-mode .header{background:#14161e;border-color:var(--gray-200);}
+body.dark-mode .card,body.dark-mode .stat-card,body.dark-mode .team-overview-card,body.dark-mode .kpi-card,body.dark-mode .goal-card,body.dark-mode .dday-card,body.dark-mode .quote-card,body.dark-mode .banner{background:#1a1d27;border-color:var(--gray-200);color:var(--gray-800);}
+body.dark-mode .kpi-expanded-right,body.dark-mode .weekly-stat-card{background:#1a1d27;border-color:var(--gray-200);}
+body.dark-mode .tab-btn{color:var(--gray-500);background:transparent;}
+body.dark-mode .tab-btn.active{background:#1a1d27;color:var(--gray-800);}
+body.dark-mode .modal-content{background:#1a1d27;color:var(--gray-800);}
+body.dark-mode .form-input,body.dark-mode .form-select{background:var(--gray-100);color:var(--gray-800);border-color:var(--gray-200);}
+body.dark-mode .progress-track{background:var(--gray-200);}
+body.dark-mode .dark-toggle{background:#1a1d27;border-color:var(--gray-300);color:var(--gray-700);}
+body.dark-mode .sync-btn,body.dark-mode .sync-settings-btn{background:#1a1d27;border-color:var(--gray-300);color:var(--gray-600);}
+body.dark-mode .sync-status{background:var(--gray-100);color:var(--gray-500);}
+body.dark-mode .edit-toggle{background:#1a1d27;border-color:var(--gray-300);}
+body.dark-mode .edit-toggle svg{stroke:var(--gray-600);}
+body.dark-mode .team-overview-card:hover{box-shadow:0 12px 28px -4px rgba(0,0,0,.4);}
+body.dark-mode .banner{background:linear-gradient(135deg,#1a2e23,#1a1d27) !important;}
+body.dark-mode .banner-greeting,body.dark-mode .banner-headline{color:var(--gray-800) !important;}
+body.dark-mode .banner-sub{color:var(--gray-500) !important;}
+
+/* ===== STATUS COLORS (달성률 기반) ===== */
+.status-danger{color:#ef4444 !important;}
+.status-warning{color:#f59e0b !important;}
+.status-good{color:#22c55e !important;}
+.status-great{color:#10b981 !important;}
+.progress-fill.status-red{background:linear-gradient(90deg,#ef4444,#f87171);}
+.progress-fill.status-yellow{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.progress-fill.status-green{background:linear-gradient(90deg,#22c55e,#4ade80);}
+.progress-fill.status-great{background:linear-gradient(90deg,#10b981,#34d399);}
+
+/* ===== QUARTER TREND CHART ===== */
+.quarter-chart-container{position:relative;width:100%;height:180px;margin-top:16px;}
+.quarter-chart-svg{width:100%;height:100%;}
+
+/* ===== PRINT MODE ===== */
+@media print{
+    body{background:white !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .header{position:static !important;border:none !important;padding:12px 20px !important;}
+    .header-right{display:none !important;}
+    .tab-bar{display:none !important;}
+    .main{padding:16px !important;max-width:100% !important;}
+    .edit-btn,.delete-btn,.edit-toggle,.modal-overlay,.add-btn,.banner{display:none !important;}
+    .card,.stat-card,.team-overview-card,.kpi-card,.goal-item,.dday-card,.quote-card{break-inside:avoid;box-shadow:none !important;border:1px solid #ddd !important;}
+    .progress-fill{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .team-overview-grid{grid-template-columns:repeat(2,1fr) !important;}
+    .stats-row{grid-template-columns:repeat(2,1fr) !important;}
+    .mini-progress-fill,.progress-fill{transition:none !important;}
+    @page{margin:10mm;size:A4;}
+    .print-header{display:block !important;text-align:center;padding:16px 0;border-bottom:2px solid #50CC93;margin-bottom:20px;}
+    .print-header h1{font-size:20px;font-weight:800;color:#111;margin-bottom:4px;}
+    .print-header p{font-size:12px;color:#666;}
+}
+.print-header{display:none;}
 </style>
 </head>
 <body>
 
+<div class="print-header">
+    <h1>Refeely 2026 Dashboard Report</h1>
+    <p id="printDate"></p>
+</div>
+
 <div class="header">
     <div class="header-left">
-        <div class="logo">R</div>
-        <div><div class="header-title">2026 Refeely Dashboard</div><div class="header-subtitle">Company Revenue & Team Tracker</div></div>
+        <div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATcAAABQCAIAAADzxqUzAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH6gQQAiYBac8ExwAAI2pJREFUeNrtnXtcjGn/x+eeU4ep6ZxEilbo5JSznCmrsxoSkd0cdi37sFi8tgfLs3jY5XGqZWUVUU1UTxGbQ6GESiSVIp3UVNOMpuZ8//64f69e/Zr7upppTvntvF/+wHUfrvue+zp9D58LQVGUoGMggaJodXX1/fv3c3JySktLGxsbBQIBgiDGxsYODg4eHh7z58+fMmWKqamptmuqQ0MgulY6oKioqLhw4cKNGzfevXsnFApxjzExMZk0adKaNWv8/PyMjY21XWUdagcRiUQqbKgIgpBIJARBtP1cnx9CofDKlSu//PJLRUWFPMdTqVRfX999+/Y5OzvrXjgcFEVFIpFUKsUtpVAoJBJJ23WEgURERLS1tankZ0ZRlEwmGxkZWVtbOzo6Ojs7Ozk5WVtb676hPuHxeIcOHfr11187OzsVOnHdunVnzpwZ4B+Z1uHz+bt27Xr16hVu6ZYtW3x8fLRdRxjk//73vywWSx2XNjIycnBwmD17dkBAwLRp02g0mrYfdoAiFAqPHDly+PBhkUik0IkUCsXT05NIJGr7CQY6EonkyZMneXl5uKVBQUHarmAfEMlkspou3dHR8erVq9OnTwcGBoaGhmZmZoIWWn9zkpOTjx07pmgTJRAIY8aMWbBggW6qIg+Q6cbA7+Y0Ub+Ojo709PTQ0NDNmzdXV1dr+5EHFu/fv//Xv/7F4/H6cW5AQMCgQYO0/QQ61I7mehEulxsTE7Ns2bJ79+5p+6kHCiiKxsXFlZaW9uNcKyurgIAA3UD6d0Bd010Qz549W7169fHjxwMDA3VfWFNTU1JSEvwYR0fHadOmOTk5UanUhoaGoqKi4uLiT58+zZs3z8XFRdtPoEMTaLqVEgiE2traTZs2kclkPz8/bT++lnn27BnE70Kj0b755pv169c7ODh0L6u4XG5+fv758+dXrFhBpVK1/QQ6NIEWWimBQGhsbNy6dautra2Hh4e234A2KSgoEAgEuEUkEun777+Piorq1RTpdPqiRYs8PT113pe/D7BWamFhIX9oi1gs7uzs/PTpk5y2yqqqql27diUkJFhaWmr7JWgHiUTy5s0bUOmYMWO++eYb0GhpYGCg7err0BywVrpt27YVK1bIeSGJRMLlcmtrawsLC//666/nz593dXXBT7l79+4ff/yxffv2gW8KVwcCgaC5uRlU6unpOXjwYG3XUceAANZKLS0t7e3tFbrcuHHjfH19t2zZcvfu3f/85z85OTmQ8EOpVBodHe3v7z969GhtvwctIBKJIJFGI0aM0FnXdGDABrF+x/eampoGBQUlJiZu27ZNX18fcuT79+8TEhL+nhH/KIpCHtzIyEjbFdQxUFDjVNPa2vrnn3/euXMn3BSZmpqqphDFzxrdQKqjG/UuCPX19bdv385gMCDHlJeXP3/+XNvvQYeOgYvaPTE0Gm3Hjh3379+vq6vDPYDP5z969Mjb21uZ0UMkEnE4HDabzeFweDyeVCpFEIRGo5mamlpYWJiYmAxAvwXcZqbWsRRF0Y6ODjabzWazOzo6sPhqKpVqYmJiYWFhZmYGX6eooz48Hq+7Pph3ikql0ul0rD5/c5u2Jvylzs7OPj4+0dHRoANevnwpEon64aNvbm4uKirKz88vKip69+5dS0sLj8fDMmYRBMHS6GxsbMaMGTN9+nRPT89Ro0apKhJAJBSIhAICSiBTqRSqHrxRCYXChoYGiUTS8z+5XC7IWYo9WlVVFaiUSqXa2toq2vV0dXWVl5c/efKkoKDgzZs3jY2NHA5HKBRiFSORSPr6+hYWFsOHD584ceLs2bMnTJhgYWGhkteFC5/Pr6ysxOpTVlbW0NDA4XAEAkF3ffT09MzNzR0cHCZOnDhr1iwPDw8rKyv11QcD98fqZtCgQeowGbS0tHA4HNwiMpmMDB48uLGxEbc4JiZm3bp1KqlESkrK8uXLQa7U8ePH//XXX+bm5nJeTSKRlJSUJCcnZ2ZmlpeX9+nywbCxsZkzZ87KlSvnzp1raGjYvwdBUZTN+lhb+brlY72gk4cSCHr6BuaDbIeNdLYYZIsAhsfy8nIGg9HW1tbzP6VSKYvFAr0TU1NT0NeAoqirq+vVq1flF1Vpamq6efNmcnJyQUGBnFYAQ0NDNze3kJCQ4OBgRU39fcJisbKyspKTk/Pz85uamuQ5RV9f38XFJTg4mMFgjBgxQqHb8Xg8b2/vhw8f4pZGR0evX7+++58cDmfVqlWFhYW4Pe+33367c+dO1c50+Hz+unXr7t69K3tZFEW9vLwIEKdcTEwMqiJevnwJ6QWHDx9eU1Mj56VevXq1adOmfvsSaTRaYGBgTk6ORCJR9ClEQmHZ87zUCyeunjx49eTBa6cOXjv1L+zvN87/9jL/gVDABz2+agelsWPHtra2ylPn9vb2c+fOeXh49HvO7+LicurUKTabrZIvgcvl/vnnn1OnTu13yuSoUaOOHTvGYrHkv2lHR8fMmTNBF4yOju55sFQq3b9/P+hgd3f3jx8/quRVdJOfn29mZoZ7O319/YSEBA2FE5iZmUHCmLq6uvh8fp8X4fF4p0+f9vPzO3XqFGj8l+ci169fDw4OPnjwIJvNlv9EqURSXpT/6skDfiePSCQSiUQEISIIgv1dwO8qe/64tCBXLMYfG1UbuSFnX/7kyZOwsLBvvvnm2bNnoClcn5SWln7//fcrV6589uyZktUuLCxcs2ZNZGRkfn6+WCzu30XKy8u3b9++YsUKUFa3kiAIEhgYCBoGysrKsrOzVXg7qVTKZDJBn6KHh8fChQs1F/QD+bBQOfyldXV1mzZt2rp1q0oyVJubm/fu3bt+/fp3797JecrHD9XlxQWYXQr36VAUrXpVWPf2jZwXVCsikSg2NpbBYGRkZPQjv7wXYrE4IyNj2bJlycnJIPUgOBKJJCEhISQkJCUlRXkxAKlUeufOneXLl8fHx/e794EwatSoBQsW4BaJRKLExER5BhU5qa+vT09Pxy1CEGTp0qUWFhYaaqUdHR2QOBt9fX24Uae8vDwiIuLixYsqVHuQSqVJSUkRERGQYNpuxCJh1atCkVAA6WsQBBGLxVWlRUK+XOtk9SEQCI4dO7Z58+YPHz6o8LLV1dUbNmy4cOGCog1DKBSePHly48aNqtUA+PDhw6ZNm6Kjo/s9LIOgUCgMBgNkWM7NzX3x4oWq7nX79u3KykrcIjs7uyVLlhA0lgX+7t27XraTntDpdIjdrKqqat26dX/99Zc6KvbgwYMNGza8f/8eftindnZbc2Of80wEQTitrPZWbQZpCIXCX3/9df/+/R0dHSq/eGtr644dOxQKFxOLxadPn96zZw/IhqkMHA5n9+7dsbGx/RvhIcyYMWP8+PG4RW1tbUwmUyV35PF4iYmJoF5v8eLFmJ1ME54YFEUfPHgA8TrY2tqCWmlLS8vWrVtzcnL6vAtmtbewsKDT6SQSSSKRtLW1NTU19bn4fPDgwY8//hgTE2NiYgJ8m1y2SCggyIFYJOzgtFkPGdbr/1U7MQN9IiiKXrp06eDBg33avREEwZzJ3d7Rjo6OpqYmiNkZg81m79y5087Obvbs2X3WE0XRa9eu7du3r09tRARBMG+tubk5Vh8ej9fc3Nzc3AyfQHG53D179gwbNszLy0uFb9jMzGzp0qV5eXm4/VF6evrmzZuHDh2q5F2ePXuWn5+PW2RkZBQSEoLZ/DTRSmtra9PS0iAHODs76+npyf6/UCg8fPgwaNaOQaVSx40bt2jRomnTpjk6OpqbmxsYGBCJRKlU2tHRUV9f/+TJk9TU1NzcXMiHy2QyJ0yY8MMPP4BsPGJFVIslMhMwPT29UaNGyXpiamtrQSucQYMGQRwtI0aMwLXZPnz48J///CdcRWno0KHz5s2bN2+eq6urjY2NkZERZm4VCAQtLS2vX7++detWZmZmbW0t6AoNDQ27d+9OSkqytbWFv4rnz5/3OYra2trOmTNn/vz5bm5ugwcPNjY2xuojFArb2tpev359+/btjIwMiAWBxWLt3r179OjRqvUY+fj4nDhxAnfVUFlZefv27bVr1ypzfYlEkpyczOVycUsnT548efJk7O9qb6Visfjs2bNlZWWgA8hk8tSpU3Enk5mZmZg3CHTulClTvvvuOy8vL9wkVSykYeLEieHh4VlZWUePHgX1W2Kx+MSJE/Pnz584cSLuAVR9A4RIROUYDxEEoVB79zjDhw9PTU3tNQByudyQkBDQCmfbtm3h4eGgu1AoFFmbOYvFioqKamhoAJ1lZWUVERERHh4+evRo2UZOo9HMzc2dnJz8/Pxev3595syZuLg40LQ5Ly/v7Nmze/fuhTh42Gx2VFRUTU0N6ABzc/Pw8PCIiAhnZ2dZxwyNRjMzM3N0dPTx8fn222+jo6NjY2NB33RhYeGJEyeOHDmiQk1MR0dHb2/v33//XbZIIpEkJiYuW7ZMGf3ampqazMxM3CIikRgSEtL9E6t3XYqi6NWrV8+ePQtpafb29t19Rk+ampoOHTr06dMn3LP09PQ2bdrEZDLDwsL6zCM3MjJaunRpYmJiREQE6KtqaGg4deoUaHJlbGqubyBXIARFT59u3rs+ZDLZyspq0P/F2tqaQqGArkOn0weBMTc37zXsoygaGxsLWRp4eHgkJCT88ssvLi4ucN8pkUh0dXU9fvz46dOnQaMliqIXLlwA6VBjB1y5cuXOnTugA9zd3ePj448ePeru7g5vWgiCjB49+ujRo+fOnYOMlvHx8cr7inpCIpFCQkJAa7G8vDwlb5eZmQkyiIwYMWLx4sXd/1RjKxUIBH/88ce2bdvgEx5vb287O7te/4mi6OXLl58+fYp7ip6e3o8//njkyJEhQ4bIXx87O7vjx49HRkaCprVpaWmguH+asYn1UIc+J70oiloOHko3k0t9Qv4ptDxUVlbGxMSA1qszZ86Mi4ubP3++/G5bKpUaHh5+5swZGxsb3AMaGhr+/PNP0B0/fPhw5swZkPV10qRJcXFxixcvlj/WgkwmMxiMmJgY0GqQxWLFxsaq1t47ZcoU3CGEQCBwudzk5OR+mxu4XG5SUhLo7fn4+PRsFGpppVKptKSk5LvvvtuyZQtEjoBAIFhaWq5atUr2p2psbLx48SLuMyAI8tVXX+3cubMfEdh0On3//v0gV1hbW1tiYiLuTYkk0hduE2nGJijYsoeiUn1D2kh3DzJ4hFQTWKcG8nM4OTmdPHmyf6n2fn5+UVFRuFYDAoGQmpqKO6FFUTQxMRG0zHFwcDh58qS7u3s/6uPl5XXgwAFQgGdGRsbbt29V8Ub/F2Nj45CQEFDXlpmZCZnPw4EMxSYmJsHBwT1vCmulQqGwU254PF5ra+ubN2+YTOaGDRuWLFly7ty5Pi17K1asmDBhAu7zv379GveUCRMm7Nq1q99JElZWVj/99BNokpyVlfXx40fcIjMrG/dpc/UMaVKptNcwiIWVUaj6rpNnWdsOI2ic+vp6kGKovr7+7t27x40b178rIwgSHh7+5Zdf4pa+f/8eV12ZxWJdvXoVd7JAoVB27NgxZcqUfj/ssmXLAgMDcYsaGhogc+z+4e3tDQobfv/+PWhhCUcsFicmJoJah6wTCLYeOHnyJJPJlPPGEomEw+GwWKyWlhY5g13c3d23bNkiuzbr6upKSUnBnUtQKJRNmzYpaQGfMmXKl19+eenSJdmi6urqoqIi3MUYgiB2I8dQ9PTKnj9ua+qZM4ESiWQzK+sxE6fZDndCtKHhdP/+fZBnfM6cOUuXLlXm4jQaLTIyMisrS/arkkql2dnZ4eHhvRaWjx49Ai1Zp0+fHhoaqkx99PX1IyMj09PTZS1JKIpmZ2evX79ehRqow4YNW7JkyYkTJ2SLpFJpcnJyeHg4nU5X6Jpv3769ffs2bhE2se89WdCWBJaFhUVaWhpu8HFxcTEoNH/8+PFNTU3KxzczmUyQ5eann36Cn8vv5NVUlD6/fyv3v4m5/018ei/z3ZuSzo5PitaBzWZDhE57hYBDEIlEIBE5CoVy+fJl5V9XW1vbpEmTcG/h7OzcK/pcLBaDUqlIJNK5c+eUr8+nT59A3toRI0bIZm4oFG0vS25uLsiXbmhoeOvWLYUqL5VKjxw5AoqQcXFxqa+v73WKdsT7aDTavn37QPOoJ0+etLS04BYtXLhQJRmGY8eOBe2wgiW7Qs7VMzAcNtJ5wmyv6d5B072DPOYsdhjlZkDTmkxRU1MTaIXj4OAwa9Ys5W9hamoK6lDq6+t7eRTb2tpAHq8hQ4bMnTtX+frQaDRQr/Hx40f5Y7PlZMKECTNmzMAt6uzsTEpKUshkxWazmUwmCrAd+vn5yQ6cWmildDr9559/joyMxLXvSaXSgoIC3GegUqmzZs1SSWof5hfBLaqpqZEzto5IIhEHgARERUUFSAfDw8Ojz8ADeUAQBLQ26+jo6OVOqK6uBjkYxo0bN2yYCtbtCII4OTnhFnV1dam8lRoaGjIYDJC7KCsrSyGTFSQM2NLSMigoSPYL17S2vb29/c8//xwaGgp65s7OzvLyctwiU1NTOp1eX1+vfDV4PB6oM2ttbW1vbwfl+w1AysrKQHYIe3t7bDqq5C0QBAG5HCQSSa9fpLy8HOTltre3x/JCla8PKOAURVGVfCG9WLhw4ahRo3D33cKSWuQ0oQuFwmvXroECzmbPnu3m5ib7/5prpUQiceHChXv37p06dSrkMDabDYqeYbPZq1evJpPJSv7MCIJIpVLQb9nZ2amOOHU1gaIoRHjlwoULkMmV/CAIAnF6t7a29vxnVVUV6I5Xr17FVnHK1wcUhEQgENQhSTl48GA/Pz/cVoqiKJPJ/Oqrr+QRGykrK7t79y5uEZVKXbZsGa7TS3OtlEwmR0ZGwpsogUBoa2trb2/HLRKJRCqfzMiC+Z809lqUBNLdEAgELFpd3XXo2YDhQxmLxdKAqqucCjsKgSBIUFDQ77//3qtLwnjx4kVubq6/vz/8IiiK3rhxA6Qg4+rqOmfOHNwiza1LhUIhk8mEZMZgtLe3qzDFth+IRCLtVkDR2iqkOKEOev6mEokE9zvWJGKxWPnhWhY3NzdQK+Lz+YmJiX0mPzc3N9+4cQNUGhgYCHLjw8ZSW1tb+RXDMFAUhVhfbt++XVxcDPdod3Z2Kq8toAyY7VuLFVAIsVis9fl5T2uHRCLReh+nJpFUPT09BoORnp6O2xqzs7PLysrGjh0LucK9e/dAO0rb2Nj4+/uDag5rpVu3boWkZeCCoui+ffvOnDmDW9ra2nr58mW4UpbK03kVhUQiUTQe4tdvUBRVh6SIMvXR+i+IIIiaGurcuXNdXV0LCwtli5qamlJTU93d3UG3xsZb0Ai0YMECiP0JNuM1Nja2UhBra+vVq1dD9PJSU1PhZuuBsP+aCrOf1A0mj6bdOvTs1NTXQuRHfVMhS0tLUHAigUC4fv06ZNVdUlLy4MED3CJ9fX0GgwEZG1T/OWI52QkJCbiltbW1SUlJe/bsAf2WBgYGZDIZt8vR09P74osv1N2E6HS6ogFfWoRMJkNSHO3s7BRds/SDnq5UIpEICs0nEAhDhgzRwHa1jo6OaroygiD+/v6nT5/GDfYuLS29e/fu8uXLZYukUmlKSgpIVGj8+PGQ0CiCOloplvGUlpaGqxiAoui1a9fWrl0L8rabmpoaGBjgmunMzMwuXryoqGKyoiAIIv/eylqHQqFA2uHatWs3b96s7jr03K6CTCZDZlKhoaG7du1Sd30g3YTyjB49esGCBfHx8bJFmLxgQECA7P4dDQ0NILkSBEGCg4Ph/nm1jEszZ86cMWMGKJ64rKwsPT29p5p4T7BtXXB7HTab3dzcDIl9/RtCJBIhSbaVlZUa3iMHQRBILkRlZaWxsfFntOyXBZMXTE5OxjWSPXjwoKSkRDYl9c6dOxUVFbgXtLOz8/Hxgd9ULUsaIyOjVatWgX4MiURy+fJlkFPUzMwM9DMLBIIHDx58RgZYDQCJlSMQCE+fPoUIrKiJkSNHgpbKRUVF/U7IHDjMnDkTIi+YkpLSy37W2dkJEQr08vLqc3qoLsODl5cXxCr99OlTUASGoaGhq6sr6MSsrCwNuOk/L1xcXECqH+/evQNZLNTHmDFjQAv7uro61QrDawVMXhBkWElLS+u18cLz588fP36MezCNRoNECHejrlZqZWW1YsUKiFX60qVLuItPIpE4bdo00CSttLQULimoJmq72m58LJTnT8rH5687NDp8OTk5OTg44BaJxeJLly5BgunUgaOj48iRI3GLpFJpXFwcRJn5c8HX11dWBgijoqKiZyY6loMKEQqUJyFejUb8gIAAiLXt/v37BQUFuEVTp04F2ZYwCWaICKWaqOpsjq17dKHuYWxffy7UPizkaHRSZ2VlBbEQ5uTkyJ/KrxJMTU0h6XIFBQVXrlz53JctI0aMAMn/YvKC3UGmNTU1GRkZuEf2EgqEoMZWam9vHxwcDCrlcDjx8fG4iXkODg4QReYXL14cPnxYwwEuCAEhIgiRgBARYl9/EISgUYchkUj09fUFScwIBIJDhw6VlJRo7l0hiI+PD+jjE4lER48eVa3Yn+bBFBVAPrDHjx93y9zdvHkTFHzeSygQghpbKZFIXL58OUiBjkAgZGRk4IobUSiU0NBQkAIViqJ//PHHqVOntBtIOKCYMWMGSOqOQCBUVFRs3bpVtXvGwJk0aRJkeK+pqfnHP/4BSeX5LIDIC3I4HGzbK7hQ4JIlS+TMtlVv2IqLiwu2HQ0ujY2N165dw32GWbNmzZs3D3Qin8/ft2/fb7/9pkz2g1gsvnHjRlZWllrfgGYwMTH5+uuvIWI/mBoQKHFXTt6+fRsTEyNPwhCNRvv6668hCnKPHj2KjIyEyPnKQ01NzdmzZzW86u4GLi+YkZFRX1//9OlTkFqtrFAgBPW2UjKZvHLlSkgoT1JSEm4fb2RktGXLFsgWDB0dHVFRUZs3b+6fsmN9ff1PP/20evXqY8eOaT1aXSX4+vrOnz8fcsCtW7eWL1+elpbWj33rBALB9evXQ0JCfvzxRzm3G/Py8gIp5mDcu3dv+fLlSUlJfaZJySISiTIyMhgMxo4dO0DNQAMsXrx4+PDhuEXv3r1LTU1NSkoC7QYyY8YMXPVMXNQeAjplyhRQvg+BQKiqqgLl8syePXvt2rWQoFCBQHD+/Hl/f3/QZh64YNrKAQEBhw4d4nK5jx8/Bm3k/nlhYmKya9cukEwMRnFx8apVqzZu3JiXlyfnwl4oFObl5W3YsGH16tXFxcXt7e1ybjdGo9F27twJV3ssLS1du3bt119/nZOTI+e0SCQSPXv27Ntvvw0LCysoKOjo6EhKStJWvsGwYcNAAQlSqfTEiRPXr1/HLSWTySEhIaA1nSwkY2Nj0GDi6+sL2jdFfigUCpVKTU1NxX2VmD5dYGCgbI1JJJKbm9vTp0/hfnAWi5WVlXXz5s3Kyko+n08mk8lkMolEImJ2HAJBKpXy+fzm5ubCwsI///xz7969586d6xYKEolEKIr6+vrCA3Rqulrz26sJcmRFoQTU1XiIO71vLVI+nx8XFweKOvDx8VE0ysrOzo5IJN6/fx/y1QoEgqKiouvXrxcUFGCJqRQKpefrQlFUJBJxOJzKysqMjIzDhw//8ssvjx8/7h6BW1tbAwICIPvTdWNra2tgYJCdnQ0R7xIKhSUlJTdu3MjPz8cSU7Gfj0QidddHLBZzudzq6upbt279+9//PnjwYG5ubvcI3NLS4uvrCwlLJBAIIpEoPj4e1JX341VjIAhiZGSUkpKCOx1oa2sDDaSjR4/eu3ev/OHimkj+mDdvnoeHx6NHj3BLi4uLs7KywsLCZItsbW2PHTsWFhYGiq7CQFH0zZs3b968OXv2rLW19ZAhQ2xsbCwsLPT09FAU5XK5TU1NtbW1DQ0NuG8tKyuruLgYYn35XCASiRs2bKisrPz999/hro62tra0tLS0tDQzM7PBgwdjQfB0Oh1BED6f39LSUl9fX1dX19LSInudqqqqrKysyMjIPuuDIMiaNWsqKytPnDgBH37b29szMjIyMjJMTExsbW2760MkErGd4BoaGurq6lgslux1Pnz4kJGR8f3332vlnU+YMGH69Ok3b95U6Cx/f3+FVOM00UrNzMxWrlyZn5+P28eLRKK4uDh/f3/cABoPD4/Tp0+vX79enm2kRSJRfX29ouJUra2tV65cmThxoibjXdUEjUY7cOAAl8sF5ST1gs1ms9ls0DYCuEgkkqSkpNDQUMjG0N0YGBhERUW1t7dfvHhRHh8ph8PhcDiQHfpkQVE0OTl5zZo1ECuG+sDkBe/cuSO/2KeFhUVgYKBC+X0aSk309fWFJLk+fPgQNNISCIQFCxacO3duzJgx6qteSkoKfLj+jLC0tDx+/PjatWvV1+nk5eU9efJEzoNNTU2PHj26ceNG9QXZP3/+PDc3V00X75OFCxdCQqllmT17tqJ75Gioldra2jIYDFApj8eLi4uD2B7nzZt3+fLlhQsXqinD2MDAACRO+TlibW3922+/RUVFqWl4kUqlCgXNm5ubHzly5MCBA2pKLkVRFKQArAFsbW39/PzkPJhKpTIYDEVz6zTUShEEYTAYoNBHAoGQlZUFN/GPHz8+Pj5+9+7d1tbWKqwYnU5fs2YNk8kEaaV/ptDp9D179ly6dEmZfZNkQRDEw8Pj/PnzuLnOEGg02g8//HD58mVPT0/VdrVjx46NiYmJiIhQ4TUVfSdBQUFw81U3Li4u/VD315wYx8iRIyFSiC0tLVeuXIGb1K2trffv389kMhkMhvJyCmZmZiEhIUlJSdHR0a6urnJ+On3uAqKx99knJBLJ19c3JSXlwIEDX3zxhZJXI5PJ48ePP3bsWGpqKiQyDAKRSFy0aFFSUtLhw4f7t01jr6dzc3M7fPhwenr66tWr5Vkkqw83NzdITGtPAgMD+7GFCrnbBK9uSCRSWFjY1atXQUqQqampGzduhE/xiUTizJkzPTw8Hj58mJCQkJ2dXVtbq5AcFibL4uXlFRQUNHHiRNm0elxQudV0FGqoGlAJsrW13bNnD4PBSElJuX79+suXLxVVG7axsZk2bVpQUNCCBQsg8Z5yMmjQoO3btwcHB6ekpDCZzJcvXyoaVWJlZTV16tTAwMBFixbJv8005HdRvm/FhIvS09PhUatwoUAICJPJBDmUJ0+eDEpB6h9CoTA7OxuUuIQgiKenJ2RW3AuJRFJdXf348eOcnJwXL17U1dVxOBxZZz2CIPr6+hYWFo6OjpMmTZo1a5aHh4eiO8018NtffaqT58dECQRHQ6uRtEF9HikUCu/evQvqs1T+8gkEQmtra1FR0f37958+fVpZWdnS0tLZ2Sk7f6FQKMbGxkOHDnVzc/P09JwxY8bIkSPVIVPCZrOLi4ux7KiKioqWlhYejydbHzKZbGxsPGTIEFdXV0wGZNSoUQptYCsSiW7evNkr7bMbT09PZ2dnJZ+lubnZ29u7qKgIckxYWFhsbGw/rGjIgJqk9Q8URdvb2xsbG+vr6xsbG9lsdnt7u0gkIpFIpqamlpaWQ4cOtbOzs7Gx0e68aODQ1dXV3NxcX1/f0NDAYrHa29uxAdbQ0NDCwmLw4MF2dnZDhgwxNzfXjHeKz+ezWCzMi4bVB9vIB6uPjY3NsGHDsPoMWHlHFEUPHDgQFRUFOkBfX//atWvy25l68v+hlerQMRAoKSnx8vIC7SU/derUzMzM/u0Spn3xWx06/n9gamoKyjiVRygQgq6V6tChGrKzs0Fu5KFDh/YpFAhB10p16FABmFAgKE7Q29tbGS1vXSvVoUMFwIUCQ0JClLF76VqpDh3KAhcKnDRpkpIRYLpWqkOHsvQpFKhkqJyulerQoSwQocDhw4fLKRQIQddKdehQij6FAu3t7ZW8ha6V6tChFPn5+SoRCoSga6U6dPQfsVgMEQqcNm2a8sphBF0r1aFDGTAVKNwiEonEYDD6keIni66V6tDRf9LT07v1KHvh5OS0aNEildxF10p16Ognra2tycnJoHwVRYUCIQzQPCAdOgY+L168ePv2reycFkVRExMTX19fVaX4/w99MT0KjBrNeAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNi0wNC0xNlQwMjozNzo1NSswMDowMEKIescAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjYtMDQtMTZUMDI6Mzc6NTUrMDA6MDAz1cJ7AAAAAElFTkSuQmCC" alt="Refeely" style="height:36px;width:auto;"></div>
+        <div><div class="header-title">2026 Dashboard</div><div class="header-subtitle">Company Revenue & Team Tracker</div></div>
     </div>
     <div class="header-right">
         <div class="sync-status" id="syncStatus"><span class="sync-dot"></span><span id="syncLabel">로컬 모드</span></div>
@@ -233,6 +339,9 @@ body.edit-mode .add-btn{display:block;}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
         <button class="sync-settings-btn" onclick="openSyncModal()">☁️ 동기화 설정</button>
+        <button class="sync-btn" onclick="exportToCSV()" title="CSV 내보내기">📥 CSV</button>
+        <button class="sync-btn" onclick="printDashboard()" title="인쇄/PDF">🖨️ 인쇄</button>
+        <button class="dark-toggle" id="darkToggle" onclick="toggleDarkMode()" title="다크 모드">🌙</button>
         <div class="live-badge"><span class="live-dot"></span>LIVE</div>
         <div class="date-display" id="currentDate"></div>
         <button class="edit-toggle" id="editToggle" onclick="toggleEditMode()">
@@ -298,9 +407,9 @@ function getDefaultData(){
                     {label:'Q4 (10~12월)',target:'3.5억',current:'—',percent:0}
                 ],
                 kpis:[
-                    {title:'계약 매출',current:'0.6억',target:'목표 12억',percent:5,quarter:'all'},
-                    {title:'신규 계약 건수',current:'3건',target:'목표 40건',percent:7.5,quarter:'all'},
-                    {title:'영업 파이프라인',current:'4.2억',target:'진행중 딜',percent:35,quarter:'Q1'}
+                    {title:'계약 매출',current:'0.6억',target:'목표 12억',percent:5,quarter:'all',isPrimary:true},
+                    {title:'신규 계약 건수',current:'3건',target:'목표 40건',percent:7.5,quarter:'all',isPrimary:false},
+                    {title:'영업 파이프라인',current:'4.2억',target:'진행중 딜',percent:35,quarter:'Q1',isPrimary:false}
                 ],
                 goals:[
                     {title:'대기업 연간 계약 체결',status:'at-risk',target:'5건',current:'1건',deadline:'12월',percent:20,quarter:'all'},
@@ -318,9 +427,9 @@ function getDefaultData(){
                     {label:'Q4 (10~12월)',target:'3억',current:'—',percent:0}
                 ],
                 kpis:[
-                    {title:'D2C 총 매출',current:'0.4억',target:'목표 8억',percent:5,quarter:'all'},
-                    {title:'월 주문건수',current:'480건',target:'목표 2,000건/월',percent:24,quarter:'all'},
-                    {title:'객단가',current:'38,000원',target:'목표 45,000원',percent:84,quarter:'Q1'}
+                    {title:'D2C 총 매출',current:'0.4억',target:'목표 8억',percent:5,quarter:'all',isPrimary:true},
+                    {title:'월 주문건수',current:'480건',target:'목표 2,000건/월',percent:24,quarter:'all',isPrimary:false},
+                    {title:'객단가',current:'38,000원',target:'목표 45,000원',percent:84,quarter:'Q1',isPrimary:false}
                 ],
                 goals:[
                     {title:'자사몰 매출 3억 달성',status:'at-risk',target:'3억',current:'0.15억',deadline:'12월',percent:5,quarter:'all'},
@@ -338,9 +447,9 @@ function getDefaultData(){
                     {label:'Q4 (10~12월)',target:'원가율 35%',current:'—',percent:0}
                 ],
                 kpis:[
-                    {title:'생산 원가율',current:'42%',target:'목표 35% 이하',percent:60,quarter:'all'},
-                    {title:'불량률',current:'2.1%',target:'목표 1% 이하',percent:47,quarter:'Q1'},
-                    {title:'생산 리드타임',current:'14일',target:'목표 10일',percent:71,quarter:'Q2'}
+                    {title:'생산 원가율',current:'42%',target:'목표 35% 이하',percent:60,quarter:'all',isPrimary:true},
+                    {title:'불량률',current:'2.1%',target:'목표 1% 이하',percent:47,quarter:'Q1',isPrimary:false},
+                    {title:'생산 리드타임',current:'14일',target:'목표 10일',percent:71,quarter:'Q2',isPrimary:false}
                 ],
                 goals:[
                     {title:'원가율 35% 이하 달성',status:'at-risk',target:'35%',current:'42%',deadline:'Q3',percent:60,quarter:'Q3'},
@@ -358,9 +467,9 @@ function getDefaultData(){
                     {label:'Q4 (10~12월)',target:'만족도 4.5점',current:'—',percent:0}
                 ],
                 kpis:[
-                    {title:'월 운영비용',current:'7,200만',target:'한도 8,000만',percent:90,quarter:'all'},
-                    {title:'인원 충원률',current:'78%',target:'목표 100%',percent:78,quarter:'Q2'},
-                    {title:'직원 만족도',current:'4.1점',target:'목표 4.5점',percent:91,quarter:'all'}
+                    {title:'월 운영비용',current:'7,200만',target:'한도 8,000만',percent:90,quarter:'all',isPrimary:true},
+                    {title:'인원 충원률',current:'78%',target:'목표 100%',percent:78,quarter:'Q2',isPrimary:false},
+                    {title:'직원 만족도',current:'4.1점',target:'목표 4.5점',percent:91,quarter:'all',isPrimary:false}
                 ],
                 goals:[
                     {title:'월 운영비 8,000만원 이내 유지',status:'on-track',target:'8,000만/월',current:'7,200만/월',deadline:'월간',percent:100,quarter:'all'},
@@ -374,7 +483,7 @@ function getDefaultData(){
 }
 
 // ===== STATE =====
-const STORAGE_KEY = 'refeelyDashboardData_v5';
+const STORAGE_KEY = 'refeelyDashboardData_v6';
 const SYNC_URL_KEY = 'refeelyDashboardSyncUrl';
 // 저장된 데이터가 유효한지 검증 후 로드 (깨진 데이터 자동 복구)
 let _saved = null;
@@ -388,7 +497,264 @@ const DEFAULT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbxsKYQStRCGCQZ
 let syncUrl = localStorage.getItem(SYNC_URL_KEY) || DEFAULT_SYNC_URL;
 let isSyncing = false;
 
+// ===== DARK MODE =====
+function toggleDarkMode(){
+    document.body.classList.toggle('dark-mode');
+    const isDark=document.body.classList.contains('dark-mode');
+    localStorage.setItem('refeely_darkmode',isDark?'1':'0');
+    document.getElementById('darkToggle').textContent=isDark?'☀️':'🌙';
+}
+(function initDarkMode(){
+    if(localStorage.getItem('refeely_darkmode')==='1'){
+        document.body.classList.add('dark-mode');
+        setTimeout(()=>{const b=document.getElementById('darkToggle');if(b)b.textContent='☀️';},0);
+    }
+})();
+
+// ===== STATUS COLOR HELPERS (달성률 기반) =====
+function getStatusColor(pct){
+    if(pct>=100) return {cls:'status-great',color:'#10b981',label:'달성'};
+    if(pct>=70) return {cls:'status-good',color:'#22c55e',label:'양호'};
+    if(pct>=40) return {cls:'status-warning',color:'#f59e0b',label:'주의'};
+    return {cls:'status-danger',color:'#ef4444',label:'위험'};
+}
+function getStatusProgressCls(pct){
+    if(pct>=100) return 'status-great';
+    if(pct>=70) return 'status-green';
+    if(pct>=40) return 'status-yellow';
+    return 'status-red';
+}
+
+// ===== QUARTER TREND SVG CHART =====
+function renderQuarterTrendChart(quarters){
+    const w=500,h=160,px=50,py=20;
+    const plotW=w-px*2,plotH=h-py*2;
+    const vals=quarters.map(q=>q.current||0);
+    const targets=quarters.map(q=>q.target||0);
+    const maxVal=Math.max(...vals,...targets,1)*1.2;
+    const labels=['Q1','Q2','Q3','Q4'];
+    const curQi=Math.floor(new Date().getMonth()/3);
+
+    function x(i){return px+i*(plotW/3);}
+    function y(v){return py+plotH-(v/maxVal)*plotH;}
+
+    // Grid lines
+    let gridLines='';
+    for(let i=0;i<=4;i++){
+        const gv=maxVal*(i/4);
+        const gy=y(gv);
+        gridLines+=`<line x1="${px}" y1="${gy}" x2="${w-px}" y2="${gy}" stroke="var(--gray-200)" stroke-width="0.5"/>`;
+        if(i<4) gridLines+=`<text x="${px-8}" y="${gy+4}" text-anchor="end" font-size="10" fill="var(--gray-400)">${Math.round(gv*10)/10}</text>`;
+    }
+
+    // Target line (dashed)
+    let targetPath='';
+    if(targets.some(t=>t>0)){
+        targetPath=`<path d="M${targets.map((t,i)=>`${x(i)},${y(t)}`).join(' L')}" fill="none" stroke="var(--gray-300)" stroke-width="1.5" stroke-dasharray="6,4"/>`;
+    }
+
+    // Gradient fill under current line
+    const gradId='qTrendGrad';
+    const areaPath=`M${x(0)},${y(vals[0])} ${vals.map((v,i)=>`L${x(i)},${y(v)}`).join(' ')} L${x(3)},${y(0)} L${x(0)},${y(0)} Z`;
+    const linePath=`M${vals.map((v,i)=>`${x(i)},${y(v)}`).join(' L')}`;
+
+    // Dots
+    let dots='';
+    vals.forEach((v,i)=>{
+        const isCur=i===curQi;
+        const sc=getStatusColor(targets[i]>0?Math.round(v/targets[i]*100):0);
+        dots+=`<circle cx="${x(i)}" cy="${y(v)}" r="${isCur?6:4}" fill="${sc.color}" stroke="white" stroke-width="2"/>`;
+        dots+=`<text x="${x(i)}" y="${y(v)-12}" text-anchor="middle" font-size="11" font-weight="700" fill="${sc.color}">${v>0?v+'억':'-'}</text>`;
+        dots+=`<text x="${x(i)}" y="${h-2}" text-anchor="middle" font-size="11" font-weight="${isCur?'800':'500'}" fill="${isCur?'var(--gray-900)':'var(--gray-400)'}">${labels[i]}</text>`;
+    });
+
+    return `<div class="quarter-chart-container">
+        <svg class="quarter-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+            <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#50CC93" stop-opacity="0.3"/><stop offset="100%" stop-color="#50CC93" stop-opacity="0.02"/></linearGradient></defs>
+            ${gridLines}
+            ${targetPath}
+            <path d="${areaPath}" fill="url(#${gradId})"/>
+            <path d="${linePath}" fill="none" stroke="#50CC93" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            ${dots}
+        </svg>
+    </div>`;
+}
+
+// ===== WEEKLY TREND CHART (전사 주차별 추이) =====
+function aggregateWeeklyData(){
+    // 모든 팀의 isRevenue KPI 주간 데이터를 주차별로 합산
+    const weekMap=new Map(); // label -> {sum, weekStart}
+    if(!DATA.teams) return [];
+    DATA.teams.forEach(team=>{
+        if(!team.kpis) return;
+        team.kpis.forEach(kpi=>{
+            if(!kpi.isRevenue||!kpi.weeklyData) return;
+            kpi.weeklyData.forEach(w=>{
+                const existing=weekMap.get(w.label)||{sum:0,label:w.label};
+                existing.sum+=w.value;
+                weekMap.set(w.label,existing);
+            });
+        });
+    });
+    // label 기준 정렬 (날짜 파싱)
+    const entries=Array.from(weekMap.values());
+    entries.sort((a,b)=>{
+        const parseDate=lbl=>{
+            const m=lbl.match(/(\d+)월\s*(\d+)일/);
+            if(!m) return 0;
+            return parseInt(m[1])*100+parseInt(m[2]);
+        };
+        return parseDate(a.label)-parseDate(b.label);
+    });
+    return entries;
+}
+
+function aggregateTeamWeeklyData(team){
+    // 한 팀의 대표 KPI 주간 데이터를 주차별로 합산
+    const weekMap=new Map();
+    if(!team.kpis) return [];
+    team.kpis.forEach(kpi=>{
+        if(!kpi.isPrimary||!kpi.weeklyData) return;
+        kpi.weeklyData.forEach(w=>{
+            const existing=weekMap.get(w.label)||{sum:0,label:w.label};
+            existing.sum+=w.value;
+            weekMap.set(w.label,existing);
+        });
+    });
+    const entries=Array.from(weekMap.values());
+    entries.sort((a,b)=>{
+        const parseDate=lbl=>{
+            const m=lbl.match(/(\d+)월\s*(\d+)일/);
+            if(!m) return 0;
+            return parseInt(m[1])*100+parseInt(m[2]);
+        };
+        return parseDate(a.label)-parseDate(b.label);
+    });
+    return entries;
+}
+
+function renderWeeklyTrendChart(weeklyEntries, unit, color, title, targetVal){
+    if(!weeklyEntries||weeklyEntries.length===0){
+        return `<div style="padding:40px;text-align:center;color:var(--gray-400);font-size:14px">주간 데이터가 없습니다. 팀별로 주간 입력을 시작하면 추이가 여기에 표시됩니다.</div>`;
+    }
+    const cumColor='#ef4444';  // 빨간색: 누적
+    const weekColor='#5B7FD6'; // 파란색: 주차별
+    const w=700,h=360,px=65,py=50;
+    const plotW=w-px-30,plotH=h-py*2-10;
+    const vals=weeklyEntries.map(e=>e.sum);
+    // 누적 합계
+    const cumVals=[];
+    vals.forEach((v,i)=>{cumVals.push(i===0?v:cumVals[i-1]+v);});
+    const maxVal=Math.max(...cumVals,targetVal||1)*1.25;
+    const n=cumVals.length;
+
+    function x(i){return px+(n>1?i*(plotW/(n-1)):plotW/2);}
+    function y(v){return py+plotH-(v/maxVal)*plotH;}
+
+    // Grid
+    let grid='';
+    for(let i=0;i<=4;i++){
+        const gv=maxVal*(i/4);
+        const gy=y(gv);
+        grid+=`<line x1="${px}" y1="${gy}" x2="${w-30}" y2="${gy}" stroke="var(--gray-200)" stroke-width="0.5"/>`;
+        grid+=`<text x="${px-10}" y="${gy+5}" text-anchor="end" font-size="12" font-weight="500" fill="var(--gray-400)">${autoFormatValue(Math.round(gv),unit)}</text>`;
+    }
+
+    // Target line (초록 점선)
+    let targetLine='';
+    if(targetVal>0){
+        const ty=y(targetVal);
+        targetLine=`<line x1="${px}" y1="${ty}" x2="${w-30}" y2="${ty}" stroke="#3BA876" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.6"/>
+        <text x="${w-28}" y="${ty-6}" font-size="11" font-weight="700" fill="#3BA876" text-anchor="end">목표 ${autoFormatValue(targetVal,unit)}</text>`;
+    }
+
+    // 범례 (Legend)
+    const legendY=16;
+    const legend=`
+        <circle cx="${px}" cy="${legendY}" r="5" fill="${cumColor}"/>
+        <text x="${px+10}" y="${legendY+4}" font-size="12" font-weight="700" fill="${cumColor}">누적 합산</text>
+        <circle cx="${px+100}" cy="${legendY}" r="5" fill="${weekColor}"/>
+        <text x="${px+110}" y="${legendY+4}" font-size="12" font-weight="700" fill="${weekColor}">주차별 실적</text>
+        ${targetVal>0?`<line x1="${px+210}" y1="${legendY}" x2="${px+230}" y2="${legendY}" stroke="#3BA876" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="${px+235}" y="${legendY+4}" font-size="12" font-weight="700" fill="#3BA876">분기 목표</text>`:''}
+    `;
+
+    // 누적 꺾은선 (빨간)
+    const cumPts=cumVals.map((v,i)=>`${x(i)},${y(v)}`);
+    const cumLinePath='M'+cumPts.join(' L');
+
+    // 주차별 꺾은선 (파란)
+    const weekPts=vals.map((v,i)=>`${x(i)},${y(v)}`);
+    const weekLinePath='M'+weekPts.join(' L');
+
+    // 누적 점 + 라벨
+    let cumDots='';
+    cumVals.forEach((v,i)=>{
+        cumDots+=`<circle cx="${x(i)}" cy="${y(v)}" r="6" fill="${cumColor}" stroke="white" stroke-width="2.5"/>`;
+        cumDots+=`<text x="${x(i)}" y="${y(v)-16}" text-anchor="middle" font-size="14" font-weight="800" fill="${cumColor}">${autoFormatValue(v,unit)}</text>`;
+    });
+
+    // 주차별 점 + 라벨
+    let weekDots='';
+    vals.forEach((v,i)=>{
+        weekDots+=`<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="${weekColor}" stroke="white" stroke-width="2"/>`;
+        weekDots+=`<text x="${x(i)}" y="${y(v)+22}" text-anchor="middle" font-size="12" font-weight="700" fill="${weekColor}">${autoFormatValue(v,unit)}</text>`;
+    });
+
+    // X축 라벨
+    let xLabels='';
+    weeklyEntries.forEach((e,i)=>{
+        const shortLabel=e.label.replace(/\s*~.*$/,'').replace(/월\s*/,'\/').replace('일','');
+        xLabels+=`<text x="${x(i)}" y="${h-6}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--gray-500)">${shortLabel}</text>`;
+    });
+
+    return `<div style="position:relative;width:100%;height:${h+10}px;margin-top:8px">
+        <svg style="width:100%;height:100%" viewBox="0 0 ${w} ${h+10}" preserveAspectRatio="xMidYMid meet">
+            ${legend}
+            ${grid}
+            ${targetLine}
+            <path d="${weekLinePath}" fill="none" stroke="${weekColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+            <path d="${cumLinePath}" fill="none" stroke="${cumColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            ${weekDots}
+            ${cumDots}
+            ${xLabels}
+        </svg>
+    </div>`;
+}
+
+function recalcCompanyFromTeams(){
+    if(!DATA.teams||!DATA.company||!DATA.company.quarters) return;
+    const qMap={'Q1':0,'Q2':1,'Q3':2,'Q4':3};
+    const curQi=Math.floor(new Date().getMonth()/3);
+    // isRevenue KPI들만 분기별로 합산
+    const qSums=[0,0,0,0];
+    DATA.teams.forEach(team=>{
+        if(!team.kpis) return;
+        team.kpis.forEach(k=>{
+            if(!k.isRevenue) return;
+            const val=extractNumber(k.current);
+            if(k.quarter && k.quarter!=='all' && qMap[k.quarter]!==undefined){
+                qSums[qMap[k.quarter]]+=val;
+            } else {
+                // 연간('all') KPI → 현재 분기에 반영
+                qSums[curQi]+=val;
+            }
+        });
+    });
+    // 회사 분기 데이터 업데이트
+    for(let i=0;i<4;i++){
+        if(DATA.company.quarters[i]){
+            DATA.company.quarters[i].current=Math.round(qSums[i]*100)/100;
+        }
+    }
+    // 연간 합산
+    DATA.company.annualCurrent=Math.round(qSums.reduce((a,b)=>a+b,0)*100)/100;
+    // 현재 분기 편의 필드
+    DATA.company.q2Current=qSums[curQi];
+}
+
 function saveData(){
+    recalcCompanyFromTeams();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
     if(syncUrl) pushToCloud();
 }
@@ -600,12 +966,15 @@ function toggleEditMode(){
 }
 
 // ===== MODAL =====
-function openModal(html){
-    document.getElementById('modalContent').innerHTML=html;
+function openModal(html,wide){
+    const mc=document.getElementById('modalContent');
+    mc.innerHTML=html;
+    if(wide) mc.classList.add('wide'); else mc.classList.remove('wide');
     document.getElementById('modalOverlay').classList.add('open');
 }
 function closeModal(){
     document.getElementById('modalOverlay').classList.remove('open');
+    document.getElementById('modalContent').classList.remove('wide');
 }
 
 // ===== TABS =====
@@ -650,10 +1019,14 @@ function renderOverview(){
     DATA.teams.forEach(t=>{
         const c=COLORS[t.colorIdx%COLORS.length];
         const p=t.mainTarget>0?Math.round((t.mainCurrent/t.mainTarget)*100):0;
+        const sc=getStatusColor(p);
         teamCards+=`
         <div class="team-overview-card" onclick="switchTab('${t.id}')">
             <div class="card-accent" style="background:${c.grad}"></div>
-            <div class="team-name"><span class="team-emoji">${t.emoji}</span>${t.name}</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+                <div class="team-name"><span class="team-emoji">${t.emoji}</span>${t.name}</div>
+                <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:${sc.color}18;color:${sc.color};white-space:nowrap">${sc.label}</span>
+            </div>
             <div class="team-main-goal">${t.mainGoal}</div>
             <div class="team-metric"><span class="team-metric-value" style="color:${c.main}">${t.mainCurrent}</span><span class="team-metric-unit">${t.mainUnit} / ${t.mainTarget}${t.mainUnit}</span></div>
             <div class="mini-progress"><div class="mini-progress-fill" style="width:0%;background:${c.grad}" data-target="${p}"></div></div>
@@ -662,24 +1035,34 @@ function renderOverview(){
     });
 
     let quarterHtml='';
-    const qColors=['green','brown','teal','sage'];
     d.quarters.forEach((q,i)=>{
         const qp=q.target>0?Math.round((q.current/q.target)*100):0;
+        const sc=getStatusColor(qp);
+        const progressCls=getStatusProgressCls(qp);
         quarterHtml+=`
         <div style="margin-bottom:20px">
-            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
                 <span style="font-size:14px;font-weight:600;color:var(--gray-700)">${q.label}</span>
-                <span style="font-size:13px;color:var(--gray-400)"><strong style="color:var(--gray-700)">${q.current}억</strong> / ${q.target}억</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:${sc.color}18;color:${sc.color}">${sc.label}</span>
+                    <span style="font-size:13px;color:var(--gray-400)"><strong style="color:var(--gray-700)">${q.current}억</strong> / ${q.target}억</span>
+                </div>
             </div>
-            <div class="progress-track"><div class="progress-fill ${qColors[i]}" style="width:0%" data-target="${qp}"></div></div>
-            <div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-top:6px;text-align:right">${qp}%${q.current===0&&i>0?' — 예정':''}</div>
+            <div class="progress-track"><div class="progress-fill ${progressCls}" style="width:0%" data-target="${qp}"></div><span class="progress-pct">${qp}%</span></div>
         </div>`;
     });
 
     function calcDDay(t){return Math.ceil((t-now)/864e5);}
-    const ddQ2=calcDDay(new Date(2026,5,30));
-    const ddH2=calcDDay(new Date(2026,6,1));
-    const ddY=calcDDay(new Date(2026,11,31));
+    // 현재 분기 자동 계산
+    const curMonth=now.getMonth();
+    const curQIdx=Math.floor(curMonth/3); // 0=Q1,1=Q2,2=Q3,3=Q4
+    const qEndDates=[new Date(now.getFullYear(),2,31),new Date(now.getFullYear(),5,30),new Date(now.getFullYear(),8,30),new Date(now.getFullYear(),11,31)];
+    const qLabels=['1분기','2분기','3분기','4분기'];
+    const ddCurQ=calcDDay(qEndDates[curQIdx]);
+    const ddY=calcDDay(new Date(now.getFullYear(),11,31));
+    const curQ=d.quarters[curQIdx]||{label:'',target:0,current:0};
+    const curQPct=curQ.target>0?Math.round((curQ.current/curQ.target)*100):0;
+    const curQRemain=Math.max(0,(curQ.target-curQ.current)).toFixed(1);
 
     const milestones=[1,3,5,10,15,20];
     const curVal=d.annualCurrent;
@@ -696,7 +1079,14 @@ function renderOverview(){
     });
 
     const hour=now.getHours();
-    let greet='좋은 아침입니다!';if(hour>=12&&hour<18)greet='좋은 오후입니다!';else if(hour>=18)greet='오늘도 수고하셨습니다!';
+    const mornings=['좋은 아침입니다!','힘찬 아침입니다!','상쾌한 아침이에요!','활기찬 아침입니다!','기분 좋은 아침이에요!','새로운 하루가 시작됐어요!','설레는 아침입니다!'];
+    const afternoons=['좋은 오후입니다!','활기찬 오후예요!','힘찬 오후입니다!','기분 좋은 오후예요!','열정 가득한 오후입니다!','에너지 넘치는 오후예요!','뜻깊은 오후입니다!'];
+    const evenings=['오늘도 수고하셨습니다!','오늘 하루도 고생 많았어요!','멋진 하루였어요!','보람찬 하루를 마무리해요!','오늘도 한 걸음 나아갔어요!','수고한 우리에게 박수!','오늘의 노력이 빛날 거예요!'];
+    const dayIdx=(now.getFullYear()*1000+now.getMonth()*32+now.getDate());
+    let greet;
+    if(hour<12) greet=mornings[dayIdx%mornings.length];
+    else if(hour<18) greet=afternoons[dayIdx%afternoons.length];
+    else greet=evenings[dayIdx%evenings.length];
 
     const quotes=[{t:"작은 진전도 진전이다. 멈추지 않는 한, 느려도 괜찮다.",a:"— 팀 전체에게"},{t:"목표는 방향이고, 실행은 연료다. 오늘의 한 걸음이 내일의 도약이 된다.",a:"— 우리의 다짐"},{t:"함께라면, 불가능해 보이는 숫자도 현실이 됩니다.",a:"— 팀 전체에게"},{t:"어제보다 오늘 1%만 더 나아지면, 1년 후엔 37배가 됩니다.",a:"— 복리의 법칙"},{t:"큰 목표는 매일의 작은 승리로 이루어진다.",a:"— 우리의 약속"}];
     const qt=quotes[now.getDate()%quotes.length];
@@ -737,8 +1127,40 @@ function renderOverview(){
     const todayBanner=bannerQuotes[(now.getFullYear()*1000+now.getMonth()*32+now.getDate())%bannerQuotes.length];
 
     return `
+    <!-- 현재 분기 D-Day + 매출 달성 현황 (최상단) -->
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:24px;margin-bottom:28px;align-items:stretch;">
+        <div class="dday-card" style="min-width:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #50CC93;background:linear-gradient(135deg,#EEFBF4,white);">
+            <div class="dday-label" style="font-size:15px;font-weight:700;color:#3BA876">${qLabels[curQIdx]} 마감까지</div>
+            <div class="dday-number blue" style="font-size:56px">D-${ddCurQ}</div>
+            <div class="dday-sub" style="color:var(--gray-500)">${qEndDates[curQIdx].toLocaleDateString('ko-KR',{month:'long',day:'numeric'})} 마감</div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div style="font-size:18px;font-weight:800;color:var(--gray-900)">${qLabels[curQIdx]} 매출 현황</div>
+                <div style="font-size:13px;font-weight:600;color:${getStatusColor(curQPct).color};background:${getStatusColor(curQPct).color}18;padding:4px 12px;border-radius:20px">${curQPct}% ${getStatusColor(curQPct).label}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:20px">
+                <div><div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">현재 매출</div><div style="font-size:28px;font-weight:900;color:#50CC93;letter-spacing:-.02em">${curQ.current}<span style="font-size:16px;font-weight:600;color:var(--gray-400)">억</span></div></div>
+                <div><div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">목표 매출</div><div style="font-size:28px;font-weight:900;color:var(--gray-800);letter-spacing:-.02em">${curQ.target}<span style="font-size:16px;font-weight:600;color:var(--gray-400)">억</span></div></div>
+                <div><div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">남은 금액</div><div style="font-size:28px;font-weight:900;color:#AA9587;letter-spacing:-.02em">${curQRemain}<span style="font-size:16px;font-weight:600;color:var(--gray-400)">억</span></div></div>
+            </div>
+            <div class="progress-track" style="height:18px"><div class="progress-fill green" style="width:0%;height:100%" data-target="${curQPct}"></div><span class="progress-pct">${curQPct}%</span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;font-weight:600"><span style="color:#50CC93">${curQ.current}억 달성</span><span style="color:var(--gray-400)">목표 ${curQ.target}억</span></div>
+        </div>
+    </div>
+
+    <!-- 주차별 매출 추이 -->
+    <div class="card" style="margin-bottom:28px">
+        <div class="card-header">
+            <div class="card-title">주차별 매출 추이</div>
+            <div class="card-badge">누적 그래프</div>
+        </div>
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">💰 매출 반영 KPI의 주간 데이터를 누적 합산한 추이입니다. 점선은 현재 분기 목표입니다.</div>
+        ${renderWeeklyTrendChart(aggregateWeeklyData(),'억','#50CC93','전사 매출',curQ.target)}
+    </div>
+
     <div class="banner"><div class="banner-content">
-        <div class="banner-greeting">${greet} 오늘의 우리 목표를 확인하세요.</div>
+        <div class="banner-greeting">${greet} 오늘 우리가 달성한 것들을 확인하세요.</div>
         <div class="banner-headline">${todayBanner}</div>
         <div class="banner-sub">${d.annualTarget}억 매출 달성, 함께 만들어가는 중입니다.</div>
     </div></div>
@@ -750,11 +1172,11 @@ function renderOverview(){
             <button class="edit-btn" onclick="event.stopPropagation();openCompanyModal()">✏️</button>
             <div class="stat-label"><span class="stat-icon">🎯</span> 연간 목표</div>
             <div class="stat-value">${d.annualTarget}<span class="stat-unit">억</span></div>
-            <div class="stat-change caution">2026년 12월 31일까지</div>
+            <div class="stat-change caution">${now.getFullYear()}년 12월 31일까지</div>
         </div>
         <div class="stat-card"><div class="stat-label"><span class="stat-icon">📈</span> 현재 달성</div><div class="stat-value">${d.annualCurrent}<span class="stat-unit">억</span></div><div class="stat-change positive">▲ 목표의 ${pct}% 달성</div></div>
         <div class="stat-card"><div class="stat-label"><span class="stat-icon">💰</span> 남은 매출</div><div class="stat-value">${remaining}<span class="stat-unit">억</span></div><div class="stat-change caution">연말까지 달성 필요</div></div>
-        <div class="stat-card"><div class="stat-label"><span class="stat-icon">⚡</span> 2분기 목표</div><div class="stat-value">${d.q2Target}<span class="stat-unit">억</span></div><div class="stat-change caution">6월 30일까지</div></div>
+        <div class="stat-card"><div class="stat-label"><span class="stat-icon">⚡</span> 월 평균 필요</div><div class="stat-value">${monthlyNeeded}<span class="stat-unit">억</span></div><div class="stat-change caution">남은 ${rm}개월 기준</div></div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
@@ -781,15 +1203,14 @@ function renderOverview(){
             </div>
         </div>
         <div class="card" style="margin-bottom:0">
-            <div class="card-header"><div class="card-title">분기별 매출 진행률</div><div class="card-badge">Q1-Q4</div></div>
-            ${quarterHtml}
+            <div class="card-header"><div class="card-title">분기별 매출 추이</div><div class="card-badge">Q1-Q4</div></div>
+            ${renderQuarterTrendChart(d.quarters)}
+            <div style="margin-top:20px">${quarterHtml}</div>
         </div>
     </div>
 
-    <div class="grid-3col">
-        <div class="dday-card"><div class="dday-label">2분기 마감까지</div><div class="dday-number blue">D-${ddQ2}</div><div class="dday-sub">D-Day</div></div>
-        <div class="dday-card"><div class="dday-label">하반기 시작까지</div><div class="dday-number purple">D-${ddH2}</div><div class="dday-sub">D-Day</div></div>
-        <div class="dday-card"><div class="dday-label">연말 마감까지</div><div class="dday-number rose">D-${ddY}</div><div class="dday-sub">D-Day</div></div>
+    <div style="margin-bottom:24px;">
+        <div class="dday-card"><div class="dday-label">연말 마감까지</div><div class="dday-number rose">D-${ddY}</div><div class="dday-sub">${now.getFullYear()}년 12월 31일</div></div>
     </div>
 
     <div class="card">
@@ -809,36 +1230,54 @@ function renderTeamPage(team){
     const qLabels=['Q1','Q2','Q3','Q4'];
     const sq=selectedQuarter; // 'all' or 'Q1'..'Q4'
 
-    // Quarters
+    // Quarters — 탭 형태
     let quarterHtml='';
     if(team.quarters && team.quarters.length){
         const now=new Date();
         const currentQ=Math.floor(now.getMonth()/3);
+        // selectedQuarter가 'all'이면 현재 분기를 기본 표시
+        const activeQKey=(sq!=='all')?sq:qLabels[currentQ];
+        const activeQIdx=qLabels.indexOf(activeQKey);
+
+        // 탭 버튼 행
+        let qTabs='';
         team.quarters.forEach((q,i)=>{
             const qKey=qLabels[i];
+            const isActive=qKey===activeQKey;
             const isCurrent=i===currentQ;
             const isPast=i<currentQ;
-            const isSelected=sq===qKey;
-            const statusTag=isCurrent?'<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:#EEFBF4;color:#3BA876;margin-left:8px">진행 중</span>'
-                :isPast?(q.percent>=80?'<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:#EEFBF4;color:#3BA876;margin-left:8px">완료</span>':'<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:#fff7ed;color:#ea580c;margin-left:8px">미달</span>')
-                :'';
-            const selBorder=isSelected?c.main:(isCurrent?'#50CC93':'var(--gray-200)');
-            const selBg=isSelected?c.bg:(isCurrent?'#FAFFFE':'white');
-            const selShadow=isSelected?'box-shadow:0 0 0 3px '+c.main+'22;':(isCurrent?'box-shadow:0 0 0 3px rgba(80,204,147,.1);':'');
-            quarterHtml+=`
-            <div onclick="selectQuarter('${qKey}')" style="padding:20px 24px;background:${selBg};border:2px solid ${selBorder};border-radius:14px;${selShadow}position:relative;cursor:pointer;transition:all .2s;">
-                <button class="edit-btn" onclick="event.stopPropagation();openQuarterModal('${team.id}',${i})">✏️</button>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-                    <div style="display:flex;align-items:center">
-                        <span style="font-size:14px;font-weight:700;color:${isSelected?c.main:'var(--gray-800)'}">${q.label}</span>
-                        ${isSelected?'<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:'+c.bg+';color:'+c.main+';margin-left:8px">선택됨</span>':statusTag}
-                    </div>
-                    <span style="font-size:13px;color:var(--gray-400)"><strong style="color:var(--gray-700)">${q.current}</strong> / ${q.target}</span>
-                </div>
-                <div class="progress-track" style="height:12px"><div class="progress-fill ${qColorCls[i%4]}" style="width:0%" data-target="${q.percent}"></div></div>
-                <div style="font-size:12px;font-weight:700;color:${c.main};margin-top:6px;text-align:right">${q.percent}%</div>
-            </div>`;
+            const dotColor=isActive?c.main:(q.percent>=80&&isPast?'#3BA876':isCurrent?'#50CC93':'var(--gray-300)');
+            qTabs+=`<button onclick="selectQuarter('${qKey}')" style="flex:1;padding:10px 8px;border:none;background:${isActive?c.main:'transparent'};color:${isActive?'white':(isCurrent?c.main:'var(--gray-500)')};font-size:13px;font-weight:${isActive?'800':'600'};border-radius:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px">
+                <span style="width:6px;height:6px;border-radius:50%;background:${isActive?'white':dotColor};display:inline-block"></span>
+                ${q.label}
+                <span style="font-size:11px;font-weight:700;opacity:.7">${q.percent}%</span>
+            </button>`;
         });
+
+        // 선택된 분기 상세
+        const aq=team.quarters[activeQIdx]||team.quarters[currentQ];
+        const aqIdx=activeQIdx>=0?activeQIdx:currentQ;
+        const isCurQ=aqIdx===currentQ;
+        const tgtNum=extractNumber(aq.target);
+        const curNum=extractNumber(aq.current);
+        const remain=Math.round((tgtNum-curNum)*100)/100;
+
+        quarterHtml=`
+        <div style="display:flex;gap:4px;padding:4px;background:var(--gray-50);border-radius:12px;margin-bottom:16px">${qTabs}</div>
+        <div style="position:relative;padding:24px;background:white;border:1px solid var(--gray-200);border-radius:14px;animation:fadeIn .25s ease;">
+            <button class="edit-btn" onclick="event.stopPropagation();openQuarterModal('${team.id}',${aqIdx})">✏️</button>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+                <span style="font-size:18px;font-weight:800;color:var(--gray-800)">${aq.label}</span>
+                ${isCurQ?'<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:#EEFBF4;color:#3BA876">진행 중</span>':''}
+            </div>
+            <div style="display:flex;gap:20px;margin-bottom:18px;flex-wrap:wrap">
+                <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">현재 달성</div><div style="font-size:26px;font-weight:900;color:${c.main}">${aq.current}</div></div>
+                <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">목표</div><div style="font-size:26px;font-weight:900;color:var(--gray-700)">${aq.target}</div></div>
+                <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">남은 금액</div><div style="font-size:26px;font-weight:900;color:#AA9587">${autoFormatValue(remain>0?remain:0,team.mainUnit||'')}</div></div>
+                <div style="margin-left:auto;display:flex;align-items:center"><div style="font-size:36px;font-weight:900;color:${c.main}">${aq.percent}<span style="font-size:18px;font-weight:700">%</span></div></div>
+            </div>
+            <div class="progress-track" style="height:16px"><div class="progress-fill ${getStatusProgressCls(aq.percent)}" style="width:0%" data-target="${aq.percent}"></div><span class="progress-pct">${aq.percent}%</span></div>
+        </div>`;
     }
 
     // Filter helper
@@ -847,42 +1286,103 @@ function renderTeamPage(team){
     // KPIs
     const filteredKpis=team.kpis.map((k,i)=>({...k,_idx:i})).filter(matchQ);
     let kpiHtml='';
+    const expandedKey=expandedKpi;
+    const expandedIdx=expandedKey?parseInt(expandedKey.split('_').pop()):null;
+    const hasExpanded=expandedKey && expandedKey.startsWith(team.id+'_');
+
+    function renderKpiCard(k,i,isSelected){
+        const isPrimary=!!k.isPrimary;
+        const isRevenue=!!k.isRevenue;
+        const primaryTag=isPrimary?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#50CC93;color:white;margin-left:6px">⭐ 대표</span>':'';
+        const revenueTag=isRevenue?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#5B7FD6;color:white;margin-left:6px">💰 매출</span>':'';
+        const qTag=(k.quarter&&k.quarter!=='all')?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+c.bg+';color:'+c.main+';margin-left:6px">'+k.quarter+'</span>':'';
+        const selectedStyle=isSelected?'border-color:'+c.main+';box-shadow:0 0 0 3px '+c.main+'22;background:'+c.bg+'33;':'';
+        const primaryBorder=(!isSelected&&isPrimary)?'border-color:'+c.main+'55;':'';
+        const hasWeekly=(k.weeklyData&&k.weeklyData.length>0);
+        const hint=(!isSelected&&!hasExpanded)?'<div style="font-size:10px;color:var(--gray-400);margin-top:8px;text-align:center">클릭하여 주차별 추이 보기 '+(hasWeekly?'📊':'')+'</div>':'';
+        const selectedIcon=isSelected?'<div style="position:absolute;top:12px;left:12px;font-size:10px;font-weight:700;color:'+c.main+';background:'+c.bg+';padding:2px 8px;border-radius:6px;">📊 선택됨</div>':'';
+        return `<div class="kpi-card" style="${selectedStyle}${primaryBorder}cursor:pointer;" onclick="toggleKpiChart('${team.id}',${i})">
+            ${selectedIcon}
+            <button class="edit-btn" onclick="event.stopPropagation();openKpiModal('${team.id}',${i})">✏️</button>
+            <button class="delete-btn" onclick="event.stopPropagation();deleteKpi('${team.id}',${i})">🗑</button>
+            <div class="kpi-title">${k.title}${primaryTag}${revenueTag}${qTag}</div>
+            <div class="kpi-row"><div class="kpi-value" style="color:${c.main}">${k.current}</div><div class="kpi-target">${k.target}</div></div>
+            <div class="kpi-progress"><div class="progress-track"><div class="progress-fill ${getStatusProgressCls(k.percent)}" style="width:0%" data-target="${k.percent}"></div><span class="progress-pct">${k.percent}%</span></div></div>
+            ${hint}
+        </div>`;
+    }
+
     if(filteredKpis.length===0 && sq!=='all'){
-        kpiHtml='<div style="padding:20px;text-align:center;color:var(--gray-400);font-size:14px;grid-column:1/-1">이 분기에 해당하는 KPI가 없습니다.</div>';
-    } else {
-        filteredKpis.forEach(k=>{
-            const i=k._idx;
-            const qTag=(k.quarter&&k.quarter!=='all')?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+c.bg+';color:'+c.main+';margin-left:6px">'+k.quarter+'</span>':'';
-            kpiHtml+=`
-            <div class="kpi-card">
-                <button class="edit-btn" onclick="event.stopPropagation();openKpiModal('${team.id}',${i})">✏️</button>
-                <button class="delete-btn" onclick="event.stopPropagation();deleteKpi('${team.id}',${i})">🗑</button>
-                <div class="kpi-title">${k.title}${qTag}</div>
-                <div class="kpi-row"><div class="kpi-value" style="color:${c.main}">${k.current}</div><div class="kpi-target">${k.target}</div></div>
-                <div class="kpi-progress"><div class="progress-track"><div class="progress-fill ${c.cls}" style="width:0%" data-target="${k.percent}"></div></div></div>
+        kpiHtml='<div style="padding:20px;text-align:center;color:var(--gray-400);font-size:14px">이 분기에 해당하는 KPI가 없습니다.</div>';
+    } else if(hasExpanded){
+        // Find selected KPI
+        const selKpi=filteredKpis.find(k=>k._idx===expandedIdx);
+        const otherKpis=filteredKpis.filter(k=>k._idx!==expandedIdx);
+        if(selKpi){
+            kpiHtml+=`<div class="kpi-expanded-layout">
+                <div class="kpi-expanded-left">${renderKpiCard(selKpi,selKpi._idx,true)}</div>
+                <div class="kpi-expanded-right" onclick="event.stopPropagation()">${renderWeeklyChart(team,selKpi,selKpi._idx,c)}</div>
             </div>`;
-        });
+        }
+        if(otherKpis.length>0){
+            kpiHtml+=`<div class="kpi-others-row">`;
+            otherKpis.forEach(k=>{ kpiHtml+=renderKpiCard(k,k._idx,false); });
+            kpiHtml+=`</div>`;
+        }
+    } else {
+        kpiHtml+=`<div class="kpi-grid">`;
+        filteredKpis.forEach(k=>{ kpiHtml+=renderKpiCard(k,k._idx,false); });
+        kpiHtml+=`</div>`;
     }
 
     // Goals
     const filteredGoals=team.goals.map((g,i)=>({...g,_idx:i})).filter(matchQ);
     let goalHtml='';
+    const expandedGoalKey=expandedGoal;
+    const expandedGoalIdx=expandedGoalKey?parseInt(expandedGoalKey.split('_').pop()):null;
+    const hasExpandedGoal=expandedGoalKey && expandedGoalKey.startsWith(team.id+'_');
+
+    function renderGoalCard(g,i,isSelected){
+        const st=STATUS_OPTIONS.find(s=>s.v===g.status)||STATUS_OPTIONS[0];
+        const qTag=(g.quarter&&g.quarter!=='all')?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+c.bg+';color:'+c.main+';margin-left:8px">'+g.quarter+'</span>':'';
+        const lkIdx=g.linkedKpi;
+        const lkKpi=(lkIdx>=0&&team.kpis[lkIdx])?team.kpis[lkIdx]:null;
+        const kpiTag=lkKpi?'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:#F0F7F3;color:#3BA876;margin-left:8px">🔗 '+lkKpi.title+'</span>':'';
+        const selectedStyle=isSelected?'border-color:'+c.main+';box-shadow:0 0 0 3px '+c.main+'22;background:'+c.bg+'33;':'';
+        const hasWeekly=(g.weeklyData&&g.weeklyData.length>0);
+        const hint=(!isSelected&&!hasExpandedGoal)?'<div style="font-size:10px;color:var(--gray-400);margin-top:8px;text-align:center">클릭하여 주차별 추이 보기 '+(hasWeekly?'📊':'')+'</div>':'';
+        const selectedIcon=isSelected?'<div style="position:absolute;top:12px;left:12px;font-size:10px;font-weight:700;color:'+c.main+';background:'+c.bg+';padding:2px 8px;border-radius:6px;">📊 선택됨</div>':'';
+        return `<div class="goal-item" style="${selectedStyle}cursor:pointer;" onclick="toggleGoalChart('${team.id}',${i})">
+            ${selectedIcon}
+            <button class="edit-btn" onclick="event.stopPropagation();openGoalModal('${team.id}',${i})">✏️</button>
+            <button class="delete-btn" onclick="event.stopPropagation();deleteGoal('${team.id}',${i})">🗑</button>
+            <div class="goal-item-header"><div class="goal-item-title">${g.title}${kpiTag}${qTag}</div><div class="goal-status ${g.status}">${st.l}</div></div>
+            <div class="goal-item-meta"><span>목표: <strong>${g.target}</strong></span><span>현재: <strong>${g.current}</strong></span><span>마감: <strong>${g.deadline}</strong></span></div>
+            <div class="progress-track"><div class="progress-fill ${getStatusProgressCls(g.percent)}" style="width:0%" data-target="${g.percent}"></div><span class="progress-pct">${g.percent}%</span></div>
+            ${hint}
+        </div>`;
+    }
+
     if(filteredGoals.length===0 && sq!=='all'){
         goalHtml='<div style="padding:20px;text-align:center;color:var(--gray-400);font-size:14px">이 분기에 해당하는 세부 목표가 없습니다.</div>';
-    } else {
-        filteredGoals.forEach(g=>{
-            const i=g._idx;
-            const st=STATUS_OPTIONS.find(s=>s.v===g.status)||STATUS_OPTIONS[0];
-            const qTag=(g.quarter&&g.quarter!=='all')?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+c.bg+';color:'+c.main+';margin-left:8px">'+g.quarter+'</span>':'';
-            goalHtml+=`
-            <div class="goal-item">
-                <button class="edit-btn" onclick="event.stopPropagation();openGoalModal('${team.id}',${i})">✏️</button>
-                <button class="delete-btn" onclick="event.stopPropagation();deleteGoal('${team.id}',${i})">🗑</button>
-                <div class="goal-item-header"><div class="goal-item-title">${g.title}${qTag}</div><div class="goal-status ${g.status}">${st.l}</div></div>
-                <div class="goal-item-meta"><span>목표: <strong>${g.target}</strong></span><span>현재: <strong>${g.current}</strong></span><span>마감: <strong>${g.deadline}</strong></span></div>
-                <div class="progress-track"><div class="progress-fill ${c.cls}" style="width:0%" data-target="${g.percent}"></div></div>
+    } else if(hasExpandedGoal){
+        const selGoal=filteredGoals.find(g=>g._idx===expandedGoalIdx);
+        const otherGoals=filteredGoals.filter(g=>g._idx!==expandedGoalIdx);
+        if(selGoal){
+            goalHtml+=`<div class="kpi-expanded-layout">
+                <div class="kpi-expanded-left">${renderGoalCard(selGoal,selGoal._idx,true)}</div>
+                <div class="kpi-expanded-right" onclick="event.stopPropagation()">${renderGoalWeeklyChart(team,selGoal,selGoal._idx,c)}</div>
             </div>`;
-        });
+        }
+        if(otherGoals.length>0){
+            goalHtml+=`<div class="goal-list">`;
+            otherGoals.forEach(g=>{ goalHtml+=renderGoalCard(g,g._idx,false); });
+            goalHtml+=`</div>`;
+        }
+    } else {
+        goalHtml+=`<div class="goal-list">`;
+        filteredGoals.forEach(g=>{ goalHtml+=renderGoalCard(g,g._idx,false); });
+        goalHtml+=`</div>`;
     }
 
     // Filter indicator
@@ -900,25 +1400,32 @@ function renderTeamPage(team){
     <div class="team-page-header" style="position:relative">
         <div class="team-page-icon" style="background:${c.bg}">${team.emoji}</div>
         <div><div class="team-page-title">${team.name}</div><div class="team-page-desc">${team.desc}</div></div>
-        <div style="margin-left:auto;display:flex;gap:8px;">
+        <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
+            <button onclick="openWeeklyBulkInput('${team.id}')" style="padding:8px 18px;border-radius:10px;border:1px solid ${c.main};background:${c.bg};color:${c.main};font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s" onmouseenter="this.style.background='${c.main}';this.style.color='white'" onmouseleave="this.style.background='${c.bg}';this.style.color='${c.main}'">📝 주간 입력</button>
             <button class="edit-btn" style="position:static;display:none" onclick="openEditTeamModal('${team.id}')">✏️</button>
             <button class="delete-btn" style="position:static;display:none" onclick="deleteTeam('${team.id}')">🗑</button>
         </div>
     </div>
 
     <div class="card" style="margin-bottom:28px">
-        <div class="card-header"><div class="card-title">분기별 목표 & 달성</div><div class="card-badge" style="cursor:pointer" onclick="selectQuarter('all')">전체 보기</div></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">${quarterHtml}</div>
+        <div class="card-header"><div class="card-title">분기별 목표 & 달성</div></div>
+        ${quarterHtml}
+    </div>
+
+    <div class="card" style="margin-bottom:28px">
+        <div class="card-header"><div class="card-title">주차별 추이</div><div class="card-badge">누적</div></div>
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">⭐ 대표 KPI의 주간 데이터 누적 추이입니다.</div>
+        ${renderWeeklyTrendChart(aggregateTeamWeeklyData(team),team.mainUnit||'',c.main,team.name,team.mainTarget)}
     </div>
 
     ${filterBar}
 
-    <div class="card-header" style="margin-bottom:16px"><div class="card-title">${kpiTitle}</div></div>
-    <div class="kpi-grid">${kpiHtml}</div>
+    <div class="card-header" style="margin-bottom:16px"><div class="card-title">${kpiTitle}</div>${hasExpanded?'<div style="font-size:12px;color:var(--gray-400);cursor:pointer" onclick="toggleKpiChart(null,null)">✕ 차트 닫기</div>':''}</div>
+    ${kpiHtml}
     <div class="add-btn" onclick="openKpiModal('${team.id}',-1)">+ KPI 추가</div>
 
-    <div class="card-header" style="margin-top:28px;margin-bottom:16px"><div class="card-title">${goalTitle}</div></div>
-    <div class="goal-list">${goalHtml}</div>
+    <div class="card-header" style="margin-top:28px;margin-bottom:16px"><div class="card-title">${goalTitle}</div>${hasExpandedGoal?'<div style="font-size:12px;color:var(--gray-400);cursor:pointer" onclick="toggleGoalChart(null,null)">✕ 차트 닫기</div>':''}</div>
+    ${goalHtml}
     <div class="add-btn" onclick="openGoalModal('${team.id}',-1)">+ 목표 추가</div>`;
 }
 
@@ -929,18 +1436,20 @@ function openCompanyModal(){
         <div class="modal-title">회사 목표 수정</div>
         <div class="form-row">
             <div class="form-group"><label class="form-label">연간 매출 목표 (억)</label><input class="form-input" id="m_at" type="number" step="0.1" value="${d.annualTarget}"></div>
-            <div class="form-group"><label class="form-label">현재 달성 (억)</label><input class="form-input" id="m_ac" type="number" step="0.1" value="${d.annualCurrent}"></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">2분기 목표 (억)</label><input class="form-input" id="m_q2t" type="number" step="0.1" value="${d.q2Target}"></div>
-            <div class="form-group"><label class="form-label">2분기 현재 (억)</label><input class="form-input" id="m_q2c" type="number" step="0.1" value="${d.q2Current}"></div>
+            <div class="form-group"><label class="form-label">현재 달성 (억)</label>
+                <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;font-size:15px;font-weight:800;color:#3BA876">${d.annualCurrent}억</div>
+                <div style="font-size:10px;color:var(--gray-400);margin-top:4px">🔗 팀별 분기 합산으로 자동 계산</div>
+            </div>
         </div>
         <hr style="border:none;border-top:1px solid var(--gray-200);margin:16px 0">
-        <div style="font-size:14px;font-weight:700;margin-bottom:12px">분기별 목표</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">분기별 목표</div>
+        <div style="font-size:11px;color:var(--gray-400);margin-bottom:12px">현재 달성은 각 팀의 분기별 수치 합산으로 자동 반영됩니다</div>
         ${d.quarters.map((q,i)=>`
-        <div class="form-row" style="margin-bottom:8px">
-            <div class="form-group" style="margin-bottom:0"><label class="form-label">${q.label} 목표</label><input class="form-input" id="m_qt${i}" type="number" step="0.1" value="${q.target}"></div>
-            <div class="form-group" style="margin-bottom:0"><label class="form-label">${q.label} 현재</label><input class="form-input" id="m_qc${i}" type="number" step="0.1" value="${q.current}"></div>
+        <div class="form-row" style="margin-bottom:8px;align-items:center">
+            <div class="form-group" style="margin-bottom:0;flex:1"><label class="form-label">${q.label} 목표</label><input class="form-input" id="m_qt${i}" type="number" step="0.1" value="${q.target}"></div>
+            <div class="form-group" style="margin-bottom:0;flex:1"><label class="form-label">${q.label} 현재</label>
+                <div style="padding:8px 12px;background:var(--gray-50);border-radius:8px;font-size:14px;font-weight:700;color:#3BA876">${q.current}억 <span style="font-size:10px;color:var(--gray-400);font-weight:600">자동</span></div>
+            </div>
         </div>`).join('')}
         <div class="modal-actions">
             <button class="btn btn-cancel" onclick="closeModal()">취소</button>
@@ -951,12 +1460,10 @@ function openCompanyModal(){
 
 function saveCompany(){
     DATA.company.annualTarget=parseFloat(document.getElementById('m_at').value)||0;
-    DATA.company.annualCurrent=parseFloat(document.getElementById('m_ac').value)||0;
-    DATA.company.q2Target=parseFloat(document.getElementById('m_q2t').value)||0;
-    DATA.company.q2Current=parseFloat(document.getElementById('m_q2c').value)||0;
+    // annualCurrent, q2Current는 팀 합산으로 자동 계산 (수동 입력 안 함)
     DATA.company.quarters.forEach((q,i)=>{
         q.target=parseFloat(document.getElementById('m_qt'+i).value)||0;
-        q.current=parseFloat(document.getElementById('m_qc'+i).value)||0;
+        // q.current는 recalcCompanyFromTeams()에서 자동 반영
     });
     saveData();closeModal();renderContent();
 }
@@ -1065,16 +1572,38 @@ function openKpiModal(teamId,idx){
     const isNew=idx<0;
     const k=isNew?{title:'',current:'',target:'',percent:0,quarter:selectedQuarter!=='all'?selectedQuarter:'all'}:t.kpis[idx];
     const qOpts=['all','Q1','Q2','Q3','Q4'].map(q=>`<option value="${q}" ${(k.quarter||'all')===q?'selected':''}>${q==='all'?'전체 (연간)':q}</option>`).join('');
+    const isPri=k.isPrimary||false;
+    const isRev=k.isRevenue||false;
+    const curNum=extractNumber(k.current);
+    const theUnit=extractUnit(k.current)||extractUnit(k.target)||'';
+    const tgtNum=extractNumber(k.target);
     openModal(`
         <div class="modal-title">${isNew?'KPI 추가':'KPI 수정'}</div>
         <div class="form-group"><label class="form-label">KPI 이름</label><input class="form-input" id="m_kt" value="${k.title}" placeholder="예: 월 매출"></div>
+        <div class="form-group"><label class="form-label">단위</label>${unitSelect('m_ku',theUnit)}</div>
         <div class="form-row">
-            <div class="form-group"><label class="form-label">현재 수치</label><input class="form-input" id="m_kc" value="${k.current}" placeholder="예: 3,200만원"></div>
-            <div class="form-group"><label class="form-label">목표 수치</label><input class="form-input" id="m_kg" value="${k.target}" placeholder="예: 목표 1억"></div>
+            <div class="form-group"><label class="form-label">현재 수치</label><input class="form-input" id="m_kcn" type="number" step="any" value="${curNum||''}" placeholder="0" oninput="autoCalcPercent('m_kcn','m_ktn','m_kp')"></div>
+            <div class="form-group"><label class="form-label">목표 수치</label><input class="form-input" id="m_ktn" type="number" step="any" value="${tgtNum||''}" placeholder="0" oninput="autoCalcPercent('m_kcn','m_ktn','m_kp')"></div>
         </div>
         <div class="form-row">
-            <div class="form-group"><label class="form-label">달성률 (%)</label><input class="form-input" id="m_kp" type="number" min="0" max="100" value="${k.percent}"></div>
+            <div class="form-group"><label class="form-label">달성률</label><div class="auto-pct"><strong id="m_kp">${k.percent||0}</strong><span>% (자동 계산)</span></div></div>
             <div class="form-group"><label class="form-label">해당 분기</label><select class="form-select" id="m_kq">${qOpts}</select></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+            <div style="padding:14px 16px;border-radius:10px;background:${isPri?'#EEFBF4':'var(--gray-50)'};display:flex;align-items:center;gap:10px;cursor:pointer" onclick="document.getElementById('m_kpri').checked=!document.getElementById('m_kpri').checked;this.style.background=document.getElementById('m_kpri').checked?'#EEFBF4':'var(--gray-50)'">
+                <input type="checkbox" id="m_kpri" ${isPri?'checked':''} style="width:18px;height:18px;accent-color:#50CC93;cursor:pointer">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:${isPri?'#3BA876':'var(--gray-700)'}">⭐ 대표 KPI로 설정</div>
+                    <div style="font-size:11px;color:var(--gray-400);margin-top:2px">대표 KPI들의 합산이 분기별 달성과 팀 메인 지표에 자동 반영됩니다</div>
+                </div>
+            </div>
+            <div style="padding:14px 16px;border-radius:10px;background:${isRev?'#EEF2FB':'var(--gray-50)'};display:flex;align-items:center;gap:10px;cursor:pointer" onclick="document.getElementById('m_krev').checked=!document.getElementById('m_krev').checked;this.style.background=document.getElementById('m_krev').checked?'#EEF2FB':'var(--gray-50)'">
+                <input type="checkbox" id="m_krev" ${isRev?'checked':''} style="width:18px;height:18px;accent-color:#5B7FD6;cursor:pointer">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:${isRev?'#5B7FD6':'var(--gray-700)'}">💰 전체 매출에 반영</div>
+                    <div style="font-size:11px;color:var(--gray-400);margin-top:2px">이 KPI의 수치가 전체 현황의 분기별 매출에 합산됩니다</div>
+                </div>
+            </div>
         </div>
         <div class="modal-actions">
             <button class="btn btn-cancel" onclick="closeModal()">취소</button>
@@ -1083,24 +1612,160 @@ function openKpiModal(teamId,idx){
     `);
 }
 
+// 문자열에서 첫 번째 숫자 추출 ('0.6억' → 0.6, '3,200만원' → 3200, '42%' → 42)
+function extractNumber(str){
+    if(typeof str==='number') return str;
+    if(!str) return 0;
+    const cleaned=String(str).replace(/,/g,'');
+    const m=cleaned.match(/-?[\d.]+/);
+    return m ? parseFloat(m[0]) : 0;
+}
+// 문자열에서 단위 추출 ('0.6억' → '억', '3건' → '건')
+function extractUnit(str){
+    if(!str||typeof str==='number') return '';
+    const s=String(str).replace(/,/g,'').trim();
+    const m=s.match(/[\d.]+\s*(.*)/);
+    return (m&&m[1])?m[1].trim():'';
+}
+const UNITS=['억','만원','원','건','%','명','점','개','일','만','kg','회','곳','종'];
+const MONEY_UNITS=['원','만원','억'];
+// 금액 자동 환산: 원 단위 숫자를 적정 한국 화폐 단위로 변환
+// 예: formatMoney(500000000) → {display:'5억', num:5, unit:'억'}
+//     formatMoney(35000000) → {display:'3,500만원', num:3500, unit:'만원'}
+//     formatMoney(1500000) → {display:'150만원', num:150, unit:'만원'}
+//     formatMoney(8000) → {display:'8,000원', num:8000, unit:'원'}
+function formatMoney(rawNum, fromUnit){
+    if(!fromUnit || !MONEY_UNITS.includes(fromUnit)) return null;
+    // 원 기준으로 환산
+    let won=rawNum;
+    if(fromUnit==='만원') won=rawNum*10000;
+    else if(fromUnit==='억') won=rawNum*100000000;
+    const abs=Math.abs(won);
+    const sign=won<0?'-':'';
+    const unitRank={'원':0,'만원':1,'억':2};
+    const minRank=unitRank[fromUnit]||0;
+    if(abs>=100000000 && minRank<=2){ // 1억 이상 → X.XX억
+        const v=Math.round(won/100000000*100)/100;
+        return {display:sign+formatComma(Math.abs(v))+'억', num:v, unit:'억'};
+    } else if(abs>=10000 && minRank<=1){ // 1만원 이상 → X,XXX만원
+        const v=Math.round(won/10000*10)/10;
+        return {display:sign+formatComma(Math.abs(v))+'만원', num:v, unit:'만원'};
+    } else if(minRank<=0){ // 1만원 미만 → X,XXX원
+        const v=Math.round(won);
+        return {display:sign+formatComma(Math.abs(v))+'원', num:v, unit:'원'};
+    } else {
+        // 입력 단위 유지 (예: 0.6억 → 0.6억)
+        return {display:sign+formatComma(Math.abs(rawNum))+fromUnit, num:rawNum, unit:fromUnit};
+    }
+}
+function formatComma(n){
+    const parts=n.toString().split('.');
+    parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');
+    return parts.join('.');
+}
+// 금액 단위일 때 값+단위 문자열을 최적 형태로 변환
+function autoFormatValue(num, unit){
+    if(!MONEY_UNITS.includes(unit)) return num+unit;
+    const result=formatMoney(num, unit);
+    if(!result) return num+unit;
+    return result.display;
+}
+function unitSelect(id,selected){
+    return '<select class="form-select" id="'+id+'" style="width:90px;flex-shrink:0">'+
+        UNITS.map(u=>'<option value="'+u+'"'+(u===selected?' selected':'')+'>'+u+'</option>').join('')+
+        '<option value=""'+((!selected||!UNITS.includes(selected))?' selected':'')+'>직접입력</option></select>';
+}
+// 수치 입력 시 달성률 자동 계산
+function autoCalcPercent(curId,tgtId,pctId){
+    const c=parseFloat(document.getElementById(curId).value)||0;
+    const t=parseFloat(document.getElementById(tgtId).value)||0;
+    const el=document.getElementById(pctId);
+    const v=t>0?Math.round((c/t)*100):0;
+    if(el.tagName==='INPUT'||el.tagName==='SELECT') el.value=v;
+    else el.textContent=v;
+}
+
 function saveKpi(teamId,idx){
     const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
-    const obj={title:document.getElementById('m_kt').value,current:document.getElementById('m_kc').value,target:document.getElementById('m_kg').value,percent:parseFloat(document.getElementById('m_kp').value)||0,quarter:document.getElementById('m_kq').value};
-    if(idx<0) t.kpis.push(obj); else t.kpis[idx]=obj;
+    const curN=parseFloat(document.getElementById('m_kcn').value)||0;
+    const tgtN=parseFloat(document.getElementById('m_ktn').value)||0;
+    const unit=document.getElementById('m_ku').value;
+    const pct=parseInt(document.getElementById('m_kp').textContent)||0;
+    const obj={
+        title:document.getElementById('m_kt').value,
+        current:autoFormatValue(curN,unit),
+        target:autoFormatValue(tgtN,unit),
+        percent:pct,
+        quarter:document.getElementById('m_kq').value,
+        isPrimary:document.getElementById('m_kpri').checked,
+        isRevenue:document.getElementById('m_krev').checked
+    };
+    if(idx<0) t.kpis.push(obj); else { const old=t.kpis[idx]; Object.assign(obj,{weeklyData:old.weeklyData,goals:old.goals}); t.kpis[idx]=obj; }
+    // 대표 KPI 합산 → 분기 달성 + 팀 메인 지표 자동 연동
+    recalcFromPrimaryKpis(t);
     saveData();closeModal();renderContent();
+}
+
+// 대표 KPI들의 합산으로 분기별 달성 + 팀 메인 지표 자동 계산
+function recalcFromPrimaryKpis(team){
+    const primaryKpis=team.kpis.filter(k=>k.isPrimary);
+    if(primaryKpis.length===0) return; // 대표 KPI 없으면 수동 모드 유지
+    const qMap={'Q1':0,'Q2':1,'Q3':2,'Q4':3};
+    const curQi=Math.floor(new Date().getMonth()/3);
+    // 분기별 합산 계산
+    const qSums=[0,0,0,0];
+    const qTargetSums=[0,0,0,0];
+    let totalSum=0;
+    primaryKpis.forEach(k=>{
+        const val=extractNumber(k.current);
+        const tgt=extractNumber(k.target);
+        if(k.quarter && k.quarter!=='all' && qMap[k.quarter]!==undefined){
+            // 특정 분기에 배정된 KPI
+            qSums[qMap[k.quarter]]+=val;
+            qTargetSums[qMap[k.quarter]]+=tgt;
+        } else {
+            // 'all' (연간) KPI → 현재 분기에 반영
+            qSums[curQi]+=val;
+            qTargetSums[curQi]+=tgt;
+        }
+        totalSum+=val;
+    });
+    // 팀 메인 지표 업데이트
+    team.mainCurrent=Math.round(totalSum*100)/100;
+    // 분기별 달성 업데이트
+    if(team.quarters){
+        for(let i=0;i<4;i++){
+            if(team.quarters[i] && qSums[i]>0){
+                team.quarters[i].current=autoFormatValue(qSums[i],team.mainUnit);
+                const tgtNum=extractNumber(team.quarters[i].target);
+                team.quarters[i].percent=tgtNum>0?Math.round((qSums[i]/tgtNum)*100):0;
+            }
+        }
+    }
 }
 
 function deleteKpi(teamId,idx){
     if(!confirm('이 KPI를 삭제하시겠습니까?'))return;
     const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
-    t.kpis.splice(idx,1);saveData();renderContent();
+    // 이 KPI에 연결된 세부 목표 연결 해제 + 인덱스 재정렬
+    t.goals.forEach(g=>{
+        if(g.linkedKpi===idx) g.linkedKpi=-1;
+        else if(g.linkedKpi>idx) g.linkedKpi--;
+    });
+    t.kpis.splice(idx,1);
+    recalcFromPrimaryKpis(t);
+    saveData();renderContent();
 }
 
 function openGoalModal(teamId,idx){
     const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
     const isNew=idx<0;
-    const g=isNew?{title:'',status:'on-track',target:'',current:'',deadline:'',percent:0,quarter:selectedQuarter!=='all'?selectedQuarter:'all'}:t.goals[idx];
+    const g=isNew?{title:'',status:'on-track',target:'',current:'',deadline:'',percent:0,quarter:selectedQuarter!=='all'?selectedQuarter:'all',linkedKpi:-1,weeklyData:[]}:t.goals[idx];
     const qOpts=['all','Q1','Q2','Q3','Q4'].map(q=>`<option value="${q}" ${(g.quarter||'all')===q?'selected':''}>${q==='all'?'전체 (연간)':q}</option>`).join('');
+    const linkedIdx=(g.linkedKpi!==undefined&&g.linkedKpi!==null)?g.linkedKpi:-1;
+    const kpiOpts=['<option value="-1" '+(linkedIdx===-1?'selected':'')+'>연결 안 함</option>'].concat(
+        t.kpis.map((k,i)=>'<option value="'+i+'" '+(linkedIdx===i?'selected':'')+'>'+k.title+(k.isPrimary?' ⭐':'')+'</option>')
+    ).join('');
     openModal(`
         <div class="modal-title">${isNew?'목표 추가':'목표 수정'}</div>
         <div class="form-group"><label class="form-label">목표명</label><input class="form-input" id="m_gt" value="${g.title}" placeholder="예: 신규 고객 100건 확보"></div>
@@ -1110,13 +1775,19 @@ function openGoalModal(teamId,idx){
             </div>
             <div class="form-group"><label class="form-label">해당 분기</label><select class="form-select" id="m_gq">${qOpts}</select></div>
         </div>
+        <div class="form-group">
+            <label class="form-label">연결할 핵심 KPI</label>
+            <select class="form-select" id="m_glk">${kpiOpts}</select>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:4px">이 목표의 현재 수치가 선택한 KPI에 자동 합산됩니다</div>
+        </div>
+        <div class="form-group"><label class="form-label">단위</label>${unitSelect('m_gu',extractUnit(g.target)||extractUnit(g.current)||'')}</div>
         <div class="form-row">
-            <div class="form-group"><label class="form-label">목표 수치</label><input class="form-input" id="m_gg" value="${g.target}" placeholder="예: 100건"></div>
-            <div class="form-group"><label class="form-label">현재 수치</label><input class="form-input" id="m_gc" value="${g.current}" placeholder="예: 45건"></div>
+            <div class="form-group"><label class="form-label">목표 수치</label><input class="form-input" id="m_gtn" type="number" step="any" value="${extractNumber(g.target)||''}" placeholder="0" oninput="autoCalcPercent('m_gcn','m_gtn','m_gp')"></div>
+            <div class="form-group"><label class="form-label">현재 수치</label><input class="form-input" id="m_gcn" type="number" step="any" value="${extractNumber(g.current)||''}" placeholder="0" oninput="autoCalcPercent('m_gcn','m_gtn','m_gp')"></div>
         </div>
         <div class="form-row">
             <div class="form-group"><label class="form-label">마감</label><input class="form-input" id="m_gd" value="${g.deadline}" placeholder="예: Q2, 12월"></div>
-            <div class="form-group"><label class="form-label">달성률 (%)</label><input class="form-input" id="m_gp" type="number" min="0" max="100" value="${g.percent}"></div>
+            <div class="form-group"><label class="form-label">달성률</label><div class="auto-pct"><strong id="m_gp">${g.percent||0}</strong><span>% (자동 계산)</span></div></div>
         </div>
         <div class="modal-actions">
             <button class="btn btn-cancel" onclick="closeModal()">취소</button>
@@ -1127,26 +1798,625 @@ function openGoalModal(teamId,idx){
 
 function saveGoal(teamId,idx){
     const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
-    const obj={title:document.getElementById('m_gt').value,status:document.getElementById('m_gs').value,target:document.getElementById('m_gg').value,current:document.getElementById('m_gc').value,deadline:document.getElementById('m_gd').value,percent:parseFloat(document.getElementById('m_gp').value)||0,quarter:document.getElementById('m_gq').value};
-    if(idx<0) t.goals.push(obj); else t.goals[idx]=obj;
+    const tgtN=parseFloat(document.getElementById('m_gtn').value)||0;
+    const curN=parseFloat(document.getElementById('m_gcn').value)||0;
+    const unit=document.getElementById('m_gu').value;
+    const pct=parseInt(document.getElementById('m_gp').textContent)||0;
+    const obj={
+        title:document.getElementById('m_gt').value,
+        status:document.getElementById('m_gs').value,
+        target:autoFormatValue(tgtN,unit),
+        current:autoFormatValue(curN,unit),
+        deadline:document.getElementById('m_gd').value,
+        percent:pct,
+        quarter:document.getElementById('m_gq').value,
+        linkedKpi:parseInt(document.getElementById('m_glk').value)
+    };
+    if(idx<0){ obj.weeklyData=[]; t.goals.push(obj); }
+    else { obj.weeklyData=t.goals[idx].weeklyData||[]; t.goals[idx]=obj; }
+    // 세부 목표 → KPI 합산 자동 연동
+    recalcKpiFromGoals(t);
+    // KPI → 분기/메인 지표 연동
+    recalcFromPrimaryKpis(t);
     saveData();closeModal();renderContent();
+}
+
+// 세부 목표들의 합산으로 연결된 KPI의 현재 수치 자동 계산
+function recalcKpiFromGoals(team){
+    if(!team.kpis||!team.goals) return;
+    // KPI별로 연결된 세부 목표 수집
+    team.kpis.forEach((kpi,kIdx)=>{
+        const linkedGoals=team.goals.filter(g=>g.linkedKpi===kIdx);
+        if(linkedGoals.length===0) return; // 연결된 목표 없으면 수동 유지
+        // 합산
+        let sumCurrent=0, sumTarget=0;
+        linkedGoals.forEach(g=>{
+            sumCurrent+=extractNumber(g.current);
+            sumTarget+=extractNumber(g.target);
+        });
+        // KPI 수치 업데이트
+        kpi.current=autoFormatValue(sumCurrent,team.mainUnit);
+        kpi.percent=sumTarget>0?Math.round((sumCurrent/sumTarget)*100):0;
+    });
 }
 
 function deleteGoal(teamId,idx){
     if(!confirm('이 목표를 삭제하시겠습니까?'))return;
     const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
-    t.goals.splice(idx,1);saveData();renderContent();
+    t.goals.splice(idx,1);
+    recalcKpiFromGoals(t);
+    recalcFromPrimaryKpis(t);
+    saveData();renderContent();
+}
+
+// ===== WEEKLY CHART =====
+let expandedKpi=null;
+let expandedGoal=null;
+
+function toggleKpiChart(teamId,idx){
+    if(teamId===null){expandedKpi=null;renderContent();return;}
+    const key=teamId+'_'+idx;
+    if(expandedKpi===key){expandedKpi=null;} else {expandedKpi=key;}
+    renderContent();
+}
+
+function renderWeeklyChart(team,kpi,kIdx,color){
+    const wd=kpi.weeklyData||[];
+    const inputRow=`<div class="weekly-input-row">
+        <input class="form-input" id="wk_label_${kIdx}" placeholder="주차 (예: 4/2주)" style="font-size:13px;max-width:120px">
+        <input class="form-input" id="wk_value_${kIdx}" type="number" step="any" placeholder="수치" style="font-size:13px">
+        <button class="btn btn-primary" style="padding:8px 18px;font-size:13px" onclick="addWeeklyData('${team.id}',${kIdx})">+ 추가</button>
+        ${wd.length>0?'<button class="btn btn-cancel" style="padding:8px 12px;font-size:12px;color:#dc2626" onclick="removeLastWeekly(\''+team.id+'\','+kIdx+')">삭제</button>':''}
+    </div>`;
+
+    if(wd.length===0){
+        return `<div>
+            <div style="font-size:16px;font-weight:800;color:var(--gray-700);margin-bottom:6px">📊 ${kpi.title} — 주차별 추이</div>
+            <div style="text-align:center;padding:40px 20px;color:var(--gray-400);font-size:14px;background:var(--gray-50);border-radius:12px;margin:20px 0">
+                <div style="font-size:32px;margin-bottom:12px">📈</div>
+                아직 주차별 데이터가 없습니다<br><span style="font-size:12px">아래에서 주차와 수치를 입력해 추이를 시작하세요</span>
+            </div>
+            ${inputRow}
+        </div>`;
+    }
+
+    // Stats cards
+    const lastVal=wd[wd.length-1].value;
+    const prevVal=wd.length>=2?wd[wd.length-2].value:null;
+    const maxVal=Math.max(...wd.map(w=>w.value));
+    const minVal=Math.min(...wd.map(w=>w.value));
+    const avgVal=Math.round((wd.reduce((s,w)=>s+w.value,0)/wd.length)*100)/100;
+    let changePct=0, changeDir='same';
+    if(prevVal!==null && prevVal>0){
+        changePct=Math.round(((lastVal-prevVal)/prevVal)*100);
+        changeDir=changePct>0?'up':changePct<0?'down':'same';
+    }
+    const changeLabel=changeDir==='up'?'▲'+Math.abs(changePct)+'%':changeDir==='down'?'▼'+Math.abs(changePct)+'%':'—';
+    const changeColor=changeDir==='up'?'#3BA876':changeDir==='down'?'#dc2626':'var(--gray-400)';
+
+    const statsHtml=`<div class="weekly-stats">
+        <div class="weekly-stat-card"><div class="stat-label">최신 (${wd[wd.length-1].label})</div><div class="stat-value" style="color:${color.main}">${lastVal}</div></div>
+        <div class="weekly-stat-card"><div class="stat-label">전주 대비</div><div class="stat-value" style="color:${changeColor}">${changeLabel}</div></div>
+        <div class="weekly-stat-card"><div class="stat-label">최고</div><div class="stat-value">${maxVal}</div></div>
+        <div class="weekly-stat-card"><div class="stat-label">평균</div><div class="stat-value">${avgVal}</div></div>
+    </div>`;
+
+    // SVG Line Chart
+    const W=600, H=200, padL=50, padR=20, padT=20, padB=36;
+    const chartW=W-padL-padR, chartH=H-padT-padB;
+    const yMin=Math.min(...wd.map(w=>w.value))*0.85;
+    const yMax=Math.max(...wd.map(w=>w.value))*1.1||1;
+    const yRange=yMax-yMin||1;
+
+    // Grid lines
+    const gridCount=4;
+    let gridLines='';
+    for(let g=0;g<=gridCount;g++){
+        const y=padT+(chartH/gridCount)*g;
+        const val=Math.round(yMax-((yMax-yMin)/gridCount)*g);
+        gridLines+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--gray-100)" stroke-width="1"/>`;
+        gridLines+=`<text x="${padL-8}" y="${y+4}" text-anchor="end" fill="var(--gray-400)" font-size="11" font-weight="600">${val}</text>`;
+    }
+
+    // Points and path
+    const points=wd.map((w,i)=>{
+        const x=padL+(wd.length===1?chartW/2:(i/(wd.length-1))*chartW);
+        const y=padT+((yMax-w.value)/yRange)*chartH;
+        return {x,y,label:w.label,value:w.value};
+    });
+
+    let pathD='M'+points.map(p=>p.x+','+p.y).join(' L');
+
+    // Gradient area
+    let areaD=pathD+` L${points[points.length-1].x},${padT+chartH} L${points[0].x},${padT+chartH} Z`;
+
+    // Labels on X axis
+    let xLabels='';
+    points.forEach((p,i)=>{
+        xLabels+=`<text x="${p.x}" y="${H-6}" text-anchor="middle" fill="var(--gray-400)" font-size="11" font-weight="600">${wd[i].label}</text>`;
+    });
+
+    // Dots
+    let dots='';
+    points.forEach((p,i)=>{
+        dots+=`<circle class="line-chart-dot" cx="${p.x}" cy="${p.y}" r="5" stroke="${color.main}" fill="white"
+            onmouseenter="showChartTip(evt,${p.x},${p.y},'${wd[i].label}: ${wd[i].value}')"
+            onmouseleave="hideChartTip()"/>`;
+    });
+
+    const svgHtml=`<div class="line-chart-container" id="lineChartWrap_${kIdx}">
+        <div class="line-chart-tooltip" id="chartTip_${kIdx}"></div>
+        <svg class="line-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="areaGrad_${kIdx}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="${color.main}" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="${color.main}" stop-opacity="0.02"/>
+                </linearGradient>
+            </defs>
+            ${gridLines}
+            <path d="${areaD}" fill="url(#areaGrad_${kIdx})"/>
+            <path d="${pathD}" fill="none" stroke="${color.main}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            ${dots}
+            ${xLabels}
+        </svg>
+    </div>`;
+
+    // Data table
+    let tableRows='';
+    wd.forEach((w,i)=>{
+        let changeCell='-';
+        if(i>0){
+            const d=w.value-wd[i-1].value;
+            const p=wd[i-1].value>0?Math.round((d/wd[i-1].value)*100):0;
+            if(d>0) changeCell='<span style="color:#3BA876;font-weight:700">▲ +'+d+' (+'+p+'%)</span>';
+            else if(d<0) changeCell='<span style="color:#dc2626;font-weight:700">▼ '+d+' ('+p+'%)</span>';
+            else changeCell='<span style="color:var(--gray-400)">— 동일</span>';
+        }
+        tableRows+=`<tr><td style="font-weight:600">${w.label}</td><td style="font-weight:800;color:${color.main}">${w.value}</td><td class="change-cell">${changeCell}</td></tr>`;
+    });
+    const tableHtml=wd.length>1?`<table class="weekly-data-table">
+        <thead><tr><th>주차</th><th>수치</th><th>변화</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+    </table>`:'';
+
+    return `<div>
+        <div style="font-size:16px;font-weight:800;color:var(--gray-700);margin-bottom:16px">📊 ${kpi.title} — 주차별 추이</div>
+        ${statsHtml}
+        ${svgHtml}
+        ${tableHtml}
+        ${inputRow}
+    </div>`;
+}
+
+// Chart tooltip helpers
+function showChartTip(evt,x,y,text){
+    const svg=evt.target.closest('svg');
+    const wrap=svg.parentElement;
+    const tip=wrap.querySelector('.line-chart-tooltip');
+    if(!tip)return;
+    const rect=svg.getBoundingClientRect();
+    const viewBox=svg.viewBox.baseVal;
+    const scaleX=rect.width/viewBox.width;
+    const scaleY=rect.height/viewBox.height;
+    tip.textContent=text;
+    tip.style.left=(x*scaleX)+'px';
+    tip.style.top=(y*scaleY-10)+'px';
+    tip.style.opacity='1';
+}
+function hideChartTip(){
+    document.querySelectorAll('.line-chart-tooltip').forEach(t=>t.style.opacity='0');
+}
+
+function recalcKpiFromWeekly(kpi,team){
+    const wd=kpi.weeklyData;
+    if(!wd||wd.length===0) return;
+    const sum=wd.reduce((s,w)=>s+w.value,0);
+    const unit=team.mainUnit||extractUnit(kpi.current)||'';
+    kpi.current=autoFormatValue(sum,unit);
+    const tgtNum=extractNumber(kpi.target);
+    kpi.percent=tgtNum>0?Math.round((sum/tgtNum)*100):0;
+}
+
+function addWeeklyData(teamId,kIdx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t||!t.kpis[kIdx])return;
+    const label=document.getElementById('wk_label_'+kIdx).value.trim();
+    const value=parseFloat(document.getElementById('wk_value_'+kIdx).value);
+    if(!label||isNaN(value)){showToast('주차명과 수치를 입력하세요','error');return;}
+    if(!t.kpis[kIdx].weeklyData) t.kpis[kIdx].weeklyData=[];
+    t.kpis[kIdx].weeklyData.push({label:label,value:value});
+    // 주차별 합산 → KPI 현재값 자동 반영
+    recalcKpiFromWeekly(t.kpis[kIdx],t);
+    // KPI → 분기 연쇄 자동 연동
+    recalcFromPrimaryKpis(t);
+    saveData();renderContent();
+    showToast(label+' 데이터가 추가되었습니다','success');
+}
+
+function removeLastWeekly(teamId,kIdx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t||!t.kpis[kIdx])return;
+    if(!t.kpis[kIdx].weeklyData||t.kpis[kIdx].weeklyData.length===0)return;
+    if(!confirm('마지막 주차 데이터를 삭제할까요?'))return;
+    t.kpis[kIdx].weeklyData.pop();
+    recalcKpiFromWeekly(t.kpis[kIdx],t);
+    recalcFromPrimaryKpis(t);
+    saveData();renderContent();
+}
+
+// ===== GOAL WEEKLY CHART =====
+function toggleGoalChart(teamId,idx){
+    if(teamId===null){expandedGoal=null;renderContent();return;}
+    const key=teamId+'_'+idx;
+    if(expandedGoal===key){expandedGoal=null;} else {expandedGoal=key;}
+    renderContent();
+}
+
+function renderGoalWeeklyChart(team,goal,gIdx,color){
+    const wd=goal.weeklyData||[];
+    const inputRow=`<div class="weekly-input-row">
+        <input class="form-input" id="gwk_label_${gIdx}" placeholder="주차 (예: 4/2주)" style="font-size:13px;max-width:120px">
+        <input class="form-input" id="gwk_value_${gIdx}" type="number" step="any" placeholder="수치" style="font-size:13px">
+        <button class="btn btn-primary" style="padding:8px 18px;font-size:13px" onclick="addGoalWeeklyData('${team.id}',${gIdx})">+ 추가</button>
+        ${wd.length>0?'<button class="btn btn-cancel" style="padding:8px 12px;font-size:12px;color:#dc2626" onclick="removeLastGoalWeekly(\''+team.id+'\','+gIdx+')">삭제</button>':''}
+    </div>`;
+
+    if(wd.length===0){
+        return `<div>
+            <div style="font-size:16px;font-weight:800;color:var(--gray-700);margin-bottom:6px">📊 ${goal.title} — 주차별 추이</div>
+            <div style="text-align:center;padding:40px 20px;color:var(--gray-400);font-size:14px;background:var(--gray-50);border-radius:12px;margin:20px 0">
+                <div style="font-size:32px;margin-bottom:12px">📈</div>
+                아직 주차별 데이터가 없습니다<br><span style="font-size:12px">아래에서 주차와 수치를 입력해 추이를 시작하세요</span>
+            </div>
+            ${inputRow}
+        </div>`;
+    }
+
+    const lastVal=wd[wd.length-1].value;
+    const prevVal=wd.length>=2?wd[wd.length-2].value:null;
+    const maxVal=Math.max(...wd.map(w=>w.value));
+    const minVal=Math.min(...wd.map(w=>w.value));
+    const avgVal=Math.round((wd.reduce((s,w)=>s+w.value,0)/wd.length)*100)/100;
+    let changePct=0, changeDir='same';
+    if(prevVal!==null && prevVal>0){
+        changePct=Math.round(((lastVal-prevVal)/prevVal)*100);
+        changeDir=changePct>0?'up':changePct<0?'down':'same';
+    }
+    const changeLabel=changeDir==='up'?'▲'+Math.abs(changePct)+'%':changeDir==='down'?'▼'+Math.abs(changePct)+'%':'—';
+    const changeColor=changeDir==='up'?'#3BA876':changeDir==='down'?'#dc2626':'var(--gray-400)';
+
+    const statsHtml=`<div class="weekly-stats">
+        <div class="weekly-stat-card"><div class="stat-label">최신 (${wd[wd.length-1].label})</div><div class="stat-value" style="color:${color.main}">${lastVal}</div></div>
+        <div class="weekly-stat-card"><div class="stat-label">전주 대비</div><div class="stat-value" style="color:${changeColor}">${changeLabel}</div></div>
+        <div class="weekly-stat-card"><div class="stat-label">최고</div><div class="stat-value">${maxVal}</div></div>
+        <div class="weekly-stat-card"><div class="stat-label">평균</div><div class="stat-value">${avgVal}</div></div>
+    </div>`;
+
+    const uid='g'+gIdx;
+    const W=600, H=200, padL=50, padR=20, padT=20, padB=36;
+    const chartW=W-padL-padR, chartH=H-padT-padB;
+    const yMin=Math.min(...wd.map(w=>w.value))*0.85;
+    const yMax=Math.max(...wd.map(w=>w.value))*1.1||1;
+    const yRange=yMax-yMin||1;
+
+    const gridCount=4;
+    let gridLines='';
+    for(let g=0;g<=gridCount;g++){
+        const y=padT+(chartH/gridCount)*g;
+        const val=Math.round(yMax-((yMax-yMin)/gridCount)*g);
+        gridLines+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--gray-100)" stroke-width="1"/>`;
+        gridLines+=`<text x="${padL-8}" y="${y+4}" text-anchor="end" fill="var(--gray-400)" font-size="11" font-weight="600">${val}</text>`;
+    }
+
+    const points=wd.map((w,i)=>{
+        const x=padL+(wd.length===1?chartW/2:(i/(wd.length-1))*chartW);
+        const y=padT+((yMax-w.value)/yRange)*chartH;
+        return {x,y,label:w.label,value:w.value};
+    });
+
+    let pathD='M'+points.map(p=>p.x+','+p.y).join(' L');
+    let areaD=pathD+` L${points[points.length-1].x},${padT+chartH} L${points[0].x},${padT+chartH} Z`;
+
+    let xLabels='';
+    points.forEach((p,i)=>{
+        xLabels+=`<text x="${p.x}" y="${H-6}" text-anchor="middle" fill="var(--gray-400)" font-size="11" font-weight="600">${wd[i].label}</text>`;
+    });
+
+    let dots='';
+    points.forEach((p,i)=>{
+        dots+=`<circle class="line-chart-dot" cx="${p.x}" cy="${p.y}" r="5" stroke="${color.main}" fill="white"
+            onmouseenter="showChartTip(evt,${p.x},${p.y},'${wd[i].label}: ${wd[i].value}')"
+            onmouseleave="hideChartTip()"/>`;
+    });
+
+    const svgHtml=`<div class="line-chart-container" id="lineChartWrap_${uid}">
+        <div class="line-chart-tooltip" id="chartTip_${uid}"></div>
+        <svg class="line-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="areaGrad_${uid}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="${color.main}" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="${color.main}" stop-opacity="0.02"/>
+                </linearGradient>
+            </defs>
+            ${gridLines}
+            <path d="${areaD}" fill="url(#areaGrad_${uid})"/>
+            <path d="${pathD}" fill="none" stroke="${color.main}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            ${dots}
+            ${xLabels}
+        </svg>
+    </div>`;
+
+    let tableRows='';
+    wd.forEach((w,i)=>{
+        let changeCell='-';
+        if(i>0){
+            const d=w.value-wd[i-1].value;
+            const p=wd[i-1].value>0?Math.round((d/wd[i-1].value)*100):0;
+            if(d>0) changeCell='<span style="color:#3BA876;font-weight:700">▲ +'+d+' (+'+p+'%)</span>';
+            else if(d<0) changeCell='<span style="color:#dc2626;font-weight:700">▼ '+d+' ('+p+'%)</span>';
+            else changeCell='<span style="color:var(--gray-400)">— 동일</span>';
+        }
+        tableRows+=`<tr><td style="font-weight:600">${w.label}</td><td style="font-weight:800;color:${color.main}">${w.value}</td><td class="change-cell">${changeCell}</td></tr>`;
+    });
+    const tableHtml=wd.length>1?`<table class="weekly-data-table">
+        <thead><tr><th>주차</th><th>수치</th><th>변화</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+    </table>`:'';
+
+    return `<div>
+        <div style="font-size:16px;font-weight:800;color:var(--gray-700);margin-bottom:16px">📊 ${goal.title} — 주차별 추이</div>
+        ${statsHtml}
+        ${svgHtml}
+        ${tableHtml}
+        ${inputRow}
+    </div>`;
+}
+
+function recalcGoalFromWeekly(goal){
+    const wd=goal.weeklyData;
+    if(!wd||wd.length===0) return;
+    const sum=wd.reduce((s,w)=>s+w.value,0);
+    const unit=extractUnit(goal.current)||extractUnit(goal.target)||'';
+    goal.current=autoFormatValue(sum,unit);
+    const tgtNum=extractNumber(goal.target);
+    goal.percent=tgtNum>0?Math.round((sum/tgtNum)*100):0;
+}
+
+function addGoalWeeklyData(teamId,gIdx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t||!t.goals[gIdx])return;
+    const label=document.getElementById('gwk_label_'+gIdx).value.trim();
+    const value=parseFloat(document.getElementById('gwk_value_'+gIdx).value);
+    if(!label||isNaN(value)){showToast('주차명과 수치를 입력하세요','error');return;}
+    if(!t.goals[gIdx].weeklyData) t.goals[gIdx].weeklyData=[];
+    t.goals[gIdx].weeklyData.push({label:label,value:value});
+    // 주차별 합산 → 세부 목표 현재값 자동 반영
+    recalcGoalFromWeekly(t.goals[gIdx]);
+    // 세부 목표 → KPI → 분기 연쇄 자동 연동
+    recalcKpiFromGoals(t);
+    recalcFromPrimaryKpis(t);
+    saveData();renderContent();
+    showToast(label+' 데이터가 추가되었습니다','success');
+}
+
+function removeLastGoalWeekly(teamId,gIdx){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t||!t.goals[gIdx])return;
+    if(!t.goals[gIdx].weeklyData||t.goals[gIdx].weeklyData.length===0)return;
+    if(!confirm('마지막 주차 데이터를 삭제할까요?'))return;
+    t.goals[gIdx].weeklyData.pop();
+    // 주차별 합산 → 세부 목표 → KPI → 분기 연쇄 자동 연동
+    recalcGoalFromWeekly(t.goals[gIdx]);
+    recalcKpiFromGoals(t);
+    recalcFromPrimaryKpis(t);
+    saveData();renderContent();
+}
+
+// ===== WEEKLY BULK INPUT =====
+function openWeeklyBulkInput(teamId){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    const c=COLORS[t.colorIdx%COLORS.length];
+    const now=new Date();
+    function getMonday(d){ const dt=new Date(d); const day=dt.getDay(); const diff=dt.getDate()-day+(day===0?-6:1); dt.setDate(diff); dt.setHours(0,0,0,0); return dt; }
+    function fmtMD(d){ return (d.getMonth()+1)+'월 '+d.getDate()+'일'; }
+    function weekLabel(mon){
+        const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+        const m=mon.getMonth()+1;
+        const weekNames=['첫째','둘째','셋째','넷째','다섯째'];
+        const wIdx=Math.ceil(mon.getDate()/7)-1;
+        const wName=weekNames[Math.min(wIdx,4)];
+        return { value: fmtMD(mon)+' ~ '+fmtMD(sun), display: m+'월 '+wName+'주 ('+fmtMD(mon)+' ~ '+fmtMD(sun)+')' };
+    }
+    // 해당 주차에 이미 데이터가 있는지 확인
+    function hasDataForWeek(label){
+        const inKpi=t.kpis.some(k=>k.weeklyData&&k.weeklyData.some(w=>w.label===label));
+        const inGoal=t.goals.some(g=>g.weeklyData&&g.weeklyData.some(w=>w.label===label));
+        return inKpi||inGoal;
+    }
+    const thisMon=getMonday(now);
+    let weekOptions='';
+    for(let w=-4;w<=4;w++){
+        const mon=new Date(thisMon); mon.setDate(thisMon.getDate()+w*7);
+        const wk=weekLabel(mon);
+        const exists=hasDataForWeek(wk.value);
+        weekOptions+=`<option value="${wk.value}" ${w===0?'selected':''}>${exists?'✅ ':''}${wk.display}</option>`;
+    }
+
+    // 테이블 렌더 (주차 변경 시 재호출됨)
+    window._bulkTeamId=teamId;
+    window._bulkBuildRows=function(selLabel){
+        let kH='',gH='';
+        t.kpis.forEach((k,i)=>{
+            const unit=extractUnit(k.current)||extractUnit(k.target)||'';
+            const linkedGoals=t.goals.filter(g=>g.linkedKpi===i);
+            const hasLinked=linkedGoals.length>0;
+            const existing=(k.weeklyData||[]).find(w=>w.label===selLabel);
+            const existVal=existing?existing.value:'';
+            const linkedNames=linkedGoals.map(g=>g.title).join(', ');
+            if(hasLinked){
+                kH+=`<tr style="background:var(--gray-50)">
+                    <td style="padding:10px 12px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${c.main};margin-right:8px"></span>${k.title}${k.isPrimary?' ⭐':''}</td>
+                    <td style="padding:10px 8px;text-align:center"><div style="font-size:12px;color:var(--gray-400);font-weight:600">🔗 세부 목표에서 자동 합산</div><div style="font-size:10px;color:var(--gray-300);margin-top:2px">${linkedNames}</div></td>
+                    <td style="padding:10px 8px;color:var(--gray-400);font-size:12px;text-align:center">${unit}</td>
+                </tr>`;
+            } else {
+                kH+=`<tr>
+                    <td style="padding:10px 12px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${c.main};margin-right:8px"></span>${k.title}${k.isPrimary?' ⭐':''}</td>
+                    <td style="padding:10px 8px"><input class="form-input" id="bk_k${i}" type="number" step="any" value="${existVal}" placeholder="${existing?'':'수치 입력'}" style="font-size:13px;text-align:center;padding:8px;${existing?'background:#EEFBF4;border-color:#50CC93':''}">${existing?'<div style="font-size:9px;color:#3BA876;text-align:center;margin-top:2px">기존값</div>':''}</td>
+                    <td style="padding:10px 8px;color:var(--gray-400);font-size:12px;text-align:center">${unit}</td>
+                </tr>`;
+            }
+        });
+        t.goals.forEach((g,i)=>{
+            const unit=extractUnit(g.current)||extractUnit(g.target)||'';
+            const existing=(g.weeklyData||[]).find(w=>w.label===selLabel);
+            const existVal=existing?existing.value:'';
+            gH+=`<tr>
+                <td style="padding:10px 12px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${c.main};margin-right:8px;opacity:.5"></span>${g.title}</td>
+                <td style="padding:10px 8px"><input class="form-input" id="bk_g${i}" type="number" step="any" value="${existVal}" placeholder="${existing?'':'수치 입력'}" style="font-size:13px;text-align:center;padding:8px;${existing?'background:#EEFBF4;border-color:#50CC93':''}">${existing?'<div style="font-size:9px;color:#3BA876;text-align:center;margin-top:2px">기존값</div>':''}</td>
+                <td style="padding:10px 8px;color:var(--gray-400);font-size:12px;text-align:center">${unit}</td>
+            </tr>`;
+        });
+        return {kH,gH};
+    };
+
+    const initRows=window._bulkBuildRows(weekLabel(thisMon).value);
+    const isEdit=hasDataForWeek(weekLabel(thisMon).value);
+
+    openModal(`
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+            <div style="width:40px;height:40px;border-radius:12px;background:${c.bg};display:flex;align-items:center;justify-content:center;font-size:20px">${t.emoji}</div>
+            <div>
+                <div class="modal-title" style="margin-bottom:2px">${t.name} — 주간 입력</div>
+                <div style="font-size:12px;color:var(--gray-400)">이번 주 수치를 한번에 입력하세요. 빈 칸은 건너뜁니다.</div>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding:14px 16px;background:var(--gray-50);border-radius:12px">
+            <label style="font-size:13px;font-weight:700;color:var(--gray-700);white-space:nowrap">📅 주차</label>
+            <select class="form-select" id="bk_week" style="font-size:13px;font-weight:700;padding:8px 12px;flex:1" onchange="bulkWeekChanged()">${weekOptions}</select>
+        </div>
+        <div id="bk_editBadge" style="margin-bottom:16px;padding:0 4px;font-size:11px;color:#3BA876;font-weight:600;${isEdit?'':'display:none'}">✅ 이미 입력된 주차입니다 — 수정하면 기존 값을 덮어씁니다</div>
+        ${t.kpis.length>0?`
+        <div style="font-size:13px;font-weight:800;color:${c.main};margin-bottom:10px;display:flex;align-items:center;gap:6px"><span style="font-size:15px">📊</span> 핵심 KPI</div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+            <thead><tr style="border-bottom:2px solid var(--gray-200)">
+                <th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--gray-400);font-weight:700">항목</th>
+                <th style="text-align:center;padding:8px;font-size:11px;color:var(--gray-400);font-weight:700;width:120px">수치</th>
+                <th style="text-align:center;padding:8px;font-size:11px;color:var(--gray-400);font-weight:700;width:50px">단위</th>
+            </tr></thead>
+            <tbody id="bk_kpiBody">${initRows.kH}</tbody>
+        </table>`:''}
+        ${t.goals.length>0?`
+        <div style="font-size:13px;font-weight:800;color:${c.main};margin-bottom:10px;display:flex;align-items:center;gap:6px"><span style="font-size:15px">🎯</span> 세부 목표</div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+            <thead><tr style="border-bottom:2px solid var(--gray-200)">
+                <th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--gray-400);font-weight:700">항목</th>
+                <th style="text-align:center;padding:8px;font-size:11px;color:var(--gray-400);font-weight:700;width:120px">수치</th>
+                <th style="text-align:center;padding:8px;font-size:11px;color:var(--gray-400);font-weight:700;width:50px">단위</th>
+            </tr></thead>
+            <tbody id="bk_goalBody">${initRows.gH}</tbody>
+        </table>`:''}
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" style="padding:10px 28px;font-size:14px" onclick="saveWeeklyBulk('${teamId}')">💾 일괄 저장</button>
+        </div>
+    `,true);
+}
+
+function bulkWeekChanged(){
+    const sel=document.getElementById('bk_week').value;
+    const rows=window._bulkBuildRows(sel);
+    const kBody=document.getElementById('bk_kpiBody');
+    const gBody=document.getElementById('bk_goalBody');
+    if(kBody) kBody.innerHTML=rows.kH;
+    if(gBody) gBody.innerHTML=rows.gH;
+    // 기존 데이터 여부에 따라 안내 표시
+    const t=DATA.teams.find(x=>x.id===window._bulkTeamId);
+    const badge=document.getElementById('bk_editBadge');
+    if(t&&badge){
+        const hasAny=t.kpis.some(k=>(k.weeklyData||[]).some(w=>w.label===sel))||t.goals.some(g=>(g.weeklyData||[]).some(w=>w.label===sel));
+        badge.style.display=hasAny?'':'none';
+    }
+}
+
+function saveWeeklyBulk(teamId){
+    const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
+    const label=document.getElementById('bk_week').value.trim();
+    if(!label){showToast('주차명을 입력하세요','error');return;}
+
+    let savedCount=0;
+
+    // KPI weekly data — 같은 주차 있으면 덮어쓰기
+    t.kpis.forEach((k,i)=>{
+        const el=document.getElementById('bk_k'+i);
+        if(!el||el.value==='')return;
+        const val=parseFloat(el.value);
+        if(isNaN(val))return;
+        if(!k.weeklyData) k.weeklyData=[];
+        const existing=k.weeklyData.findIndex(w=>w.label===label);
+        if(existing>=0) k.weeklyData[existing].value=val;
+        else k.weeklyData.push({label:label,value:val});
+        recalcKpiFromWeekly(k,t);
+        savedCount++;
+    });
+
+    // Goal weekly data — 같은 주차 있으면 덮어쓰기
+    t.goals.forEach((g,i)=>{
+        const el=document.getElementById('bk_g'+i);
+        if(!el||el.value==='')return;
+        const val=parseFloat(el.value);
+        if(isNaN(val))return;
+        if(!g.weeklyData) g.weeklyData=[];
+        const existing=g.weeklyData.findIndex(w=>w.label===label);
+        if(existing>=0) g.weeklyData[existing].value=val;
+        else g.weeklyData.push({label:label,value:val});
+        recalcGoalFromWeekly(g);
+        savedCount++;
+    });
+
+    // Cascade: goals → KPIs → quarters
+    recalcKpiFromGoals(t);
+    recalcFromPrimaryKpis(t);
+
+    saveData();closeModal();renderContent();
+    showToast(label+' 주간 데이터 '+savedCount+'건이 저장되었습니다','success');
 }
 
 // ===== QUARTER MODAL =====
 function openQuarterModal(teamId,idx){
     const t=DATA.teams.find(x=>x.id===teamId);if(!t||!t.quarters)return;
     const q=t.quarters[idx];
+    const theUnit=t.mainUnit||extractUnit(q.target)||'억';
+    const tgtNum=extractNumber(q.target)||0;
+    const curNum=extractNumber(q.current)||0;
+    const pct=tgtNum>0?Math.round((curNum/tgtNum)*100):0;
+    const hasPrimary=t.kpis&&t.kpis.some(k=>k.isPrimary);
+    const qLabels=['Q1','Q2','Q3','Q4'];
+    const qKey=qLabels[idx]||'';
+    // 이 분기에 배정된 대표 KPI 목록
+    const linkedPrimaryKpis=(t.kpis||[]).filter(k=>k.isPrimary&&(k.quarter===qKey||k.quarter==='all'));
+    const linkedList=linkedPrimaryKpis.map(k=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-100)"><span style="font-size:13px;color:var(--gray-600)">'+k.title+'</span><span style="font-size:13px;font-weight:700;color:var(--gray-800)">'+k.current+'</span></div>').join('');
+    const autoNote=hasPrimary?`
+        <div style="padding:14px 16px;border-radius:10px;background:#EEFBF4;margin-bottom:16px">
+            <div style="font-size:12px;font-weight:700;color:#3BA876;margin-bottom:8px">⭐ 대표 KPI에서 자동 합산</div>
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:10px">현재 달성과 달성률은 대표 KPI 수치에서 자동으로 계산됩니다.</div>
+            ${linkedList?'<div style="margin-top:8px">'+linkedList+'</div>':'<div style="font-size:12px;color:var(--gray-400)">이 분기에 배정된 대표 KPI가 없습니다.</div>'}
+            <div style="display:flex;justify-content:space-between;padding:8px 0;margin-top:8px;border-top:1.5px solid #3BA87633;font-size:14px;font-weight:800;color:#3BA876"><span>합산 달성</span><span>${q.current||'0'}</span></div>
+        </div>`:'';
     openModal(`
         <div class="modal-title">${q.label} 목표 수정</div>
-        <div class="form-group"><label class="form-label">분기 목표</label><input class="form-input" id="m_qqt" value="${q.target}" placeholder="예: 3억, 원가율 38%"></div>
-        <div class="form-group"><label class="form-label">현재 달성</label><input class="form-input" id="m_qqc" value="${q.current}" placeholder="예: 1.2억, 40%"></div>
-        <div class="form-group"><label class="form-label">달성률 (%)</label><input class="form-input" id="m_qqp" type="number" min="0" max="100" value="${q.percent}"></div>
+        ${autoNote}
+        <div class="form-row">
+            <div class="form-group" style="flex:2"><label class="form-label">분기 목표 수치</label><input class="form-input" id="m_qqtn" type="number" step="any" value="${tgtNum||''}" placeholder="0" oninput="autoCalcPercent('m_qqcn','m_qqtn','m_qqp')"></div>
+            <div class="form-group" style="flex:1"><label class="form-label">단위</label>${unitSelect('m_qqu',theUnit)}</div>
+        </div>
+        ${hasPrimary?`
+            <div class="form-row">
+                <div class="form-group" style="flex:2"><label class="form-label">현재 달성 <span style="font-size:11px;color:var(--gray-400)">(자동)</span></label><input class="form-input" id="m_qqcn" type="number" step="any" value="${curNum}" readonly style="background:var(--gray-50);color:var(--gray-400)"></div>
+                <div class="form-group" style="flex:1"><label class="form-label">달성률</label><div style="padding:10px 14px;font-size:15px;font-weight:800;color:var(--primary)" id="m_qqp">${pct}%</div></div>
+            </div>
+        `:`
+            <div class="form-row">
+                <div class="form-group" style="flex:2"><label class="form-label">현재 달성</label><input class="form-input" id="m_qqcn" type="number" step="any" value="${curNum||''}" placeholder="0" oninput="autoCalcPercent('m_qqcn','m_qqtn','m_qqp')"></div>
+                <div class="form-group" style="flex:1"><label class="form-label">달성률</label><div style="padding:10px 14px;font-size:15px;font-weight:800;color:var(--primary)" id="m_qqp">${pct}%</div></div>
+            </div>
+        `}
         <div class="modal-actions">
             <button class="btn btn-cancel" onclick="closeModal()">취소</button>
             <button class="btn btn-primary" onclick="saveQuarter('${teamId}',${idx})">저장</button>
@@ -1156,10 +2426,141 @@ function openQuarterModal(teamId,idx){
 
 function saveQuarter(teamId,idx){
     const t=DATA.teams.find(x=>x.id===teamId);if(!t||!t.quarters)return;
-    t.quarters[idx].target=document.getElementById('m_qqt').value;
-    t.quarters[idx].current=document.getElementById('m_qqc').value;
-    t.quarters[idx].percent=parseFloat(document.getElementById('m_qqp').value)||0;
+    const tgtN=parseFloat(document.getElementById('m_qqtn').value)||0;
+    const unit=document.getElementById('m_qqu').value;
+    t.quarters[idx].target=autoFormatValue(tgtN,unit);
+    // 대표 KPI가 있으면 현재 달성은 건드리지 않음 (자동 합산 유지)
+    const hasPrimary=t.kpis&&t.kpis.some(k=>k.isPrimary);
+    if(!hasPrimary){
+        const curN=parseFloat(document.getElementById('m_qqcn').value)||0;
+        t.quarters[idx].current=autoFormatValue(curN,unit);
+    }
+    // 달성률 재계산
+    const tgtNum=extractNumber(t.quarters[idx].target);
+    const curNum=extractNumber(t.quarters[idx].current);
+    t.quarters[idx].percent=tgtNum>0?Math.round((curNum/tgtNum)*100):0;
     saveData();closeModal();renderContent();
+}
+
+// ===== CSV EXPORT =====
+function exportToCSV(){
+    const d=DATA;
+    const rows=[];
+    const sep=',';
+    const esc=v=>{
+        const s=String(v==null?'':v);
+        return s.includes(sep)||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;
+    };
+    const addRow=(...cols)=>rows.push(cols.map(esc).join(sep));
+
+    // 회사 전체 현황
+    addRow('===== 전체 현황 =====');
+    addRow('연간 목표','연간 달성','달성률');
+    addRow(d.company.annualTarget+'억',d.company.annualCurrent+'억',
+        d.company.annualTarget>0?Math.round(d.company.annualCurrent/d.company.annualTarget*100)+'%':'0%');
+    addRow('');
+    addRow('분기','목표','달성','달성률');
+    d.company.quarters.forEach(q=>{
+        const qp=q.target>0?Math.round(q.current/q.target*100):0;
+        addRow(q.label,q.target+'억',q.current+'억',qp+'%');
+    });
+    addRow('');
+
+    // 팀별 데이터
+    d.teams.forEach(t=>{
+        addRow('===== '+t.emoji+' '+t.name+' =====');
+        addRow('메인 목표',t.mainGoal);
+        addRow('현재',t.mainCurrent+t.mainUnit,'목표',t.mainTarget+t.mainUnit,
+            '달성률',(t.mainTarget>0?Math.round(t.mainCurrent/t.mainTarget*100):0)+'%');
+        addRow('');
+
+        // 분기
+        if(t.quarters){
+            addRow('분기','목표','달성','달성률');
+            t.quarters.forEach(q=>{
+                addRow(q.label,q.target,q.current,q.percent+'%');
+            });
+            addRow('');
+        }
+
+        // KPI
+        if(t.kpis&&t.kpis.length>0){
+            addRow('KPI','목표','달성','달성률','분기','대표','매출반영');
+            t.kpis.forEach(k=>{
+                addRow(k.title,k.target,k.current,k.percent+'%',k.quarter||'all',k.isPrimary?'O':'',k.isRevenue?'O':'');
+            });
+            addRow('');
+        }
+
+        // 세부 목표
+        if(t.goals&&t.goals.length>0){
+            addRow('세부 목표','목표','달성','달성률','상태','마감일');
+            t.goals.forEach(g=>{
+                addRow(g.title,g.target,g.current,g.percent+'%',g.status,g.deadline);
+            });
+            addRow('');
+        }
+
+        // 주간 데이터 (KPI)
+        const kpisWithWeekly=(t.kpis||[]).filter(k=>k.weeklyData&&k.weeklyData.length>0);
+        if(kpisWithWeekly.length>0){
+            addRow('--- 주간 데이터 (KPI) ---');
+            kpisWithWeekly.forEach(k=>{
+                addRow('KPI: '+k.title);
+                addRow('주차','수치');
+                k.weeklyData.forEach(w=>addRow(w.label,w.value));
+            });
+            addRow('');
+        }
+
+        // 주간 데이터 (세부 목표)
+        const goalsWithWeekly=(t.goals||[]).filter(g=>g.weeklyData&&g.weeklyData.length>0);
+        if(goalsWithWeekly.length>0){
+            addRow('--- 주간 데이터 (세부 목표) ---');
+            goalsWithWeekly.forEach(g=>{
+                addRow('목표: '+g.title);
+                addRow('주차','수치');
+                g.weeklyData.forEach(w=>addRow(w.label,w.value));
+            });
+            addRow('');
+        }
+    });
+
+    // BOM + UTF-8 for Excel
+    const bom='\uFEFF';
+    const csvContent=bom+rows.join('\n');
+    const blob=new Blob([csvContent],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const today=new Date();
+    const fname='Refeely_Dashboard_'+today.getFullYear()+(today.getMonth()+1).toString().padStart(2,'0')+today.getDate().toString().padStart(2,'0')+'.csv';
+    a.href=url;a.download=fname;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('CSV 파일이 다운로드되었습니다','success');
+}
+
+// ===== PRINT MODE =====
+function printDashboard(){
+    // 인쇄 전: progress bar 즉시 채우기 (transition 없이)
+    document.querySelectorAll('[data-target]').forEach(el=>{
+        el.style.transition='none';
+        el.style.width=el.dataset.target+'%';
+    });
+    // 인쇄 날짜 설정
+    const now=new Date();
+    const pd=document.getElementById('printDate');
+    if(pd) pd.textContent='출력일: '+now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+    // 약간의 딜레이 후 인쇄
+    setTimeout(()=>{
+        window.print();
+        // 인쇄 후 transition 복구
+        setTimeout(()=>{
+            document.querySelectorAll('[data-target]').forEach(el=>{
+                el.style.transition='';
+            });
+        },500);
+    },200);
 }
 
 // ===== INIT =====
