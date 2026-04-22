@@ -1234,7 +1234,28 @@ function renderOverview(){
     const curQPct=curQ.target>0?Math.round((curQ.current/curQ.target)*100):0;
     const curQRemain=Math.max(0,(curQ.target-curQ.current)).toFixed(1);
 
+    // 시간대별 다양한 인사말
+    function getGreeting(){
+        const h=now.getHours();
+        const mornings=['활기찬 아침이에요!','상쾌한 아침이에요!','힘찬 하루의 시작이에요!','새로운 아침이에요!','기운찬 아침이에요!','설레는 아침이에요!'];
+        const afternoons=['활기찬 오후예요!','기분 좋은 오후예요!','힘찬 오후예요!','에너지 넘치는 오후예요!','열정적인 오후예요!','보람찬 오후예요!'];
+        const evenings=['수고 많은 저녁이에요!','따뜻한 저녁이에요!','편안한 저녁이에요!','보람찬 하루의 마무리예요!','오늘도 고생 많았어요!','멋진 하루를 마무리해요!'];
+        const pool=h<12?mornings:h<18?afternoons:evenings;
+        // 날짜 기반으로 일관된 선택 (같은 날엔 같은 인사)
+        const dayIdx=(now.getFullYear()*1000+now.getMonth()*31+now.getDate())%pool.length;
+        return pool[dayIdx];
+    }
+    const greetMsg=getGreeting();
+
     return `
+    <div class="banner">
+        <div class="banner-content">
+            <div class="banner-greeting">${greetMsg}</div>
+            <div class="banner-headline">오늘 우리가 달성한 것들을 확인하세요 🚀</div>
+            <div class="banner-sub">${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 — 리필리 목표 대시보드</div>
+        </div>
+    </div>
+
     <!-- 현재 분기 D-Day + 매출 달성 현황 (최상단) -->
     <div style="display:grid;grid-template-columns:auto 1fr;gap:24px;margin-bottom:28px;align-items:stretch;">
         <div class="dday-card" style="min-width:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #50CC93;background:linear-gradient(135deg,#EEFBF4,white);">
