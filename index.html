@@ -1589,8 +1589,8 @@ function renderTeamPage(team){
         <div><div class="team-page-title">${team.name}</div><div class="team-page-desc">${team.desc}</div></div>
         <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
             <button onclick="openWeeklyBulkInput('${team.id}')" style="padding:8px 18px;border-radius:10px;border:1px solid ${c.main};background:${c.bg};color:${c.main};font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s" onmouseenter="this.style.background='${c.main}';this.style.color='white'" onmouseleave="this.style.background='${c.bg}';this.style.color='${c.main}'">📝 주간 입력</button>
-            <button class="edit-btn" style="position:static;display:none" onclick="openEditTeamModal('${team.id}')">✏️</button>
-            <button class="delete-btn" style="position:static;display:none" onclick="deleteTeam('${team.id}')">🗑</button>
+            <button class="edit-btn" style="position:static" onclick="openEditTeamModal('${team.id}')">✏️</button>
+            <button class="delete-btn" style="position:static" onclick="deleteTeam('${team.id}')">🗑</button>
         </div>
     </div>
 
