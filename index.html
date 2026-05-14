@@ -394,106 +394,25 @@ function getDefaultData(){
     return {
         company:{
             name:'2026 Refeely Dashboard',
-            annualTarget:20,
-            annualCurrent:1,
-            q2Target:3.2,
+            annualTarget:0,
+            annualCurrent:0,
+            q2Target:0,
             q2Current:0,
             quarters:[
-                {label:'Q1 (1~3월)',target:2,current:1},
-                {label:'Q2 (4~6월)',target:3.2,current:0},
-                {label:'Q3 (7~9월)',target:6,current:0},
-                {label:'Q4 (10~12월)',target:8.8,current:0}
+                {label:'Q1 (1~3월)',target:0,current:0},
+                {label:'Q2 (4~6월)',target:0,current:0},
+                {label:'Q3 (7~9월)',target:0,current:0},
+                {label:'Q4 (10~12월)',target:0,current:0}
             ],
-            monthlyActual:[2800,3200,4000,0,0,0,0,0,0,0,0,0],
-            monthlyTarget:[8000,8000,8000,10000,10000,12000,16000,18000,20000,24000,26000,28000]
+            monthlyActual:[0,0,0,0,0,0,0,0,0,0,0,0],
+            monthlyTarget:[0,0,0,0,0,0,0,0,0,0,0,0]
         },
-        teams:[
-            {id:'b2b',name:'B2B팀',emoji:'🤝',colorIdx:0,desc:'기업 고객 영업 및 파트너십',
-                mainGoal:'기업 고객 계약 매출 12억 달성',mainCurrent:0.6,mainTarget:12,mainUnit:'억',
-                quarters:[
-                    {label:'Q1 (1~3월)',target:'2억',current:'0.6억',percent:30},
-                    {label:'Q2 (4~6월)',target:'3억',current:'0억',percent:0},
-                    {label:'Q3 (7~9월)',target:'3.5억',current:'—',percent:0},
-                    {label:'Q4 (10~12월)',target:'3.5억',current:'—',percent:0}
-                ],
-                kpis:[
-                    {title:'계약 매출',current:'0.6억',target:'목표 12억',percent:5,quarter:'all',isPrimary:true},
-                    {title:'신규 계약 건수',current:'3건',target:'목표 40건',percent:7.5,quarter:'all',isPrimary:false},
-                    {title:'영업 파이프라인',current:'4.2억',target:'진행중 딜',percent:35,quarter:'Q1',isPrimary:false}
-                ],
-                goals:[
-                    {title:'대기업 연간 계약 체결',status:'at-risk',target:'5건',current:'1건',deadline:'12월',percent:20,quarter:'all'},
-                    {title:'중소기업 신규 계약',status:'on-track',target:'35건',current:'2건',deadline:'12월',percent:5.7,quarter:'all'},
-                    {title:'건당 평균 계약금액 3,000만원 이상',status:'on-track',target:'3,000만원',current:'2,000만원',deadline:'연간',percent:66,quarter:'Q2'},
-                    {title:'고객 재계약률 80% 유지',status:'on-track',target:'80%',current:'85%',deadline:'연간',percent:100,quarter:'all'}
-                ]
-            },
-            {id:'d2c',name:'D2C팀',emoji:'🛒',colorIdx:1,desc:'자사몰 및 마켓플레이스 운영',
-                mainGoal:'자사몰 + 마켓플레이스 매출 8억 달성',mainCurrent:0.4,mainTarget:8,mainUnit:'억',
-                quarters:[
-                    {label:'Q1 (1~3월)',target:'1억',current:'0.4억',percent:40},
-                    {label:'Q2 (4~6월)',target:'1.5억',current:'0억',percent:0},
-                    {label:'Q3 (7~9월)',target:'2.5억',current:'—',percent:0},
-                    {label:'Q4 (10~12월)',target:'3억',current:'—',percent:0}
-                ],
-                kpis:[
-                    {title:'D2C 총 매출',current:'0.4억',target:'목표 8억',percent:5,quarter:'all',isPrimary:true},
-                    {title:'월 주문건수',current:'480건',target:'목표 2,000건/월',percent:24,quarter:'all',isPrimary:false},
-                    {title:'객단가',current:'38,000원',target:'목표 45,000원',percent:84,quarter:'Q1',isPrimary:false}
-                ],
-                goals:[
-                    {title:'자사몰 매출 3억 달성',status:'at-risk',target:'3억',current:'0.15억',deadline:'12월',percent:5,quarter:'all'},
-                    {title:'마켓플레이스(쿠팡/네이버) 매출 5억',status:'on-track',target:'5억',current:'0.25억',deadline:'12월',percent:5,quarter:'all'},
-                    {title:'재구매율 30% 달성',status:'on-track',target:'30%',current:'22%',deadline:'연간',percent:73,quarter:'Q2'},
-                    {title:'월 신규 회원 500명 확보',status:'on-track',target:'500명/월',current:'320명/월',deadline:'월간',percent:64,quarter:'all'}
-                ]
-            },
-            {id:'production',name:'생산팀',emoji:'🏭',colorIdx:2,desc:'제품 생산 및 품질 관리',
-                mainGoal:'생산 원가율 35% 이하 달성',mainCurrent:42,mainTarget:35,mainUnit:'%',
-                quarters:[
-                    {label:'Q1 (1~3월)',target:'원가율 40%',current:'42%',percent:50},
-                    {label:'Q2 (4~6월)',target:'원가율 38%',current:'—',percent:0},
-                    {label:'Q3 (7~9월)',target:'원가율 36%',current:'—',percent:0},
-                    {label:'Q4 (10~12월)',target:'원가율 35%',current:'—',percent:0}
-                ],
-                kpis:[
-                    {title:'생산 원가율',current:'42%',target:'목표 35% 이하',percent:60,quarter:'all',isPrimary:true},
-                    {title:'불량률',current:'2.1%',target:'목표 1% 이하',percent:47,quarter:'Q1',isPrimary:false},
-                    {title:'생산 리드타임',current:'14일',target:'목표 10일',percent:71,quarter:'Q2',isPrimary:false}
-                ],
-                goals:[
-                    {title:'원가율 35% 이하 달성',status:'at-risk',target:'35%',current:'42%',deadline:'Q3',percent:60,quarter:'Q3'},
-                    {title:'제품 불량률 1% 이하',status:'at-risk',target:'1%',current:'2.1%',deadline:'Q4',percent:47,quarter:'Q4'},
-                    {title:'신제품 3종 출시',status:'on-track',target:'3종',current:'1종 완료',deadline:'12월',percent:33,quarter:'all'},
-                    {title:'생산 리드타임 10일 이내',status:'on-track',target:'10일',current:'14일',deadline:'Q3',percent:71,quarter:'Q3'}
-                ]
-            },
-            {id:'admin',name:'경영지원팀',emoji:'💼',colorIdx:3,desc:'재무, 인사, 총무 관리',
-                mainGoal:'월 운영비용 8,000만원 이내 관리',mainCurrent:7200,mainTarget:8000,mainUnit:'만원',
-                quarters:[
-                    {label:'Q1 (1~3월)',target:'운영비 8,000만 이내',current:'7,200만',percent:100},
-                    {label:'Q2 (4~6월)',target:'채용 5명 완료',current:'3명',percent:60},
-                    {label:'Q3 (7~9월)',target:'시스템 3개 도입',current:'—',percent:0},
-                    {label:'Q4 (10~12월)',target:'만족도 4.5점',current:'—',percent:0}
-                ],
-                kpis:[
-                    {title:'월 운영비용',current:'7,200만',target:'한도 8,000만',percent:90,quarter:'all',isPrimary:true},
-                    {title:'인원 충원률',current:'78%',target:'목표 100%',percent:78,quarter:'Q2',isPrimary:false},
-                    {title:'직원 만족도',current:'4.1점',target:'목표 4.5점',percent:91,quarter:'all',isPrimary:false}
-                ],
-                goals:[
-                    {title:'월 운영비 8,000만원 이내 유지',status:'on-track',target:'8,000만/월',current:'7,200만/월',deadline:'월간',percent:100,quarter:'all'},
-                    {title:'핵심 인력 채용 완료 (8명)',status:'at-risk',target:'8명',current:'3명 완료',deadline:'Q2',percent:37.5,quarter:'Q2'},
-                    {title:'직원 만족도 4.5점 이상',status:'on-track',target:'4.5점',current:'4.1점',deadline:'12월',percent:91,quarter:'Q4'},
-                    {title:'사내 시스템 디지털화 완료',status:'on-track',target:'5개 시스템',current:'2개 완료',deadline:'Q4',percent:40,quarter:'Q3'}
-                ]
-            }
-        ]
+        teams:[]
     };
 }
 
 // ===== STATE =====
-const STORAGE_KEY = 'refeelyDashboardData_v6';
+const STORAGE_KEY = 'refeelyDashboardData_v7';
 const SYNC_URL_KEY = 'refeelyDashboardSyncUrl';
 // 저장된 데이터가 유효한지 검증 후 로드 (깨진 데이터 자동 복구)
 let _saved = null;
@@ -1250,8 +1169,8 @@ function renderOverview(){
     return `
     <div class="banner">
         <div class="banner-content">
-            <div class="banner-greeting">${greetMsg}</div>
-            <div class="banner-headline">오늘 우리가 달성한 것들을 확인하세요 🚀</div>
+            <div class="banner-greeting">오늘 우리가 달성한 것들을 확인하세요 🚀</div>
+            <div class="banner-headline">${greetMsg}</div>
             <div class="banner-sub">${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 — 리필리 목표 대시보드</div>
         </div>
     </div>
