@@ -1151,7 +1151,7 @@ function renderOverview(){
     const ddCurQ=calcDDay(qEndDates[curQIdx]);
     const curQ=d.quarters[curQIdx]||{label:'',target:0,current:0};
     const curQPct=curQ.target>0?Math.round((curQ.current/curQ.target)*100):0;
-    const curQRemain=Math.max(0,(curQ.target-curQ.current)).toFixed(1);
+    const curQRemain=Math.max(0,(curQ.target-curQ.current)).toFixed(2);
 
     // 시간대별 다양한 인사말
     function getGreeting(){
