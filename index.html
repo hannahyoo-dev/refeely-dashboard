@@ -708,22 +708,27 @@ function renderWeeklyTrendChart(weeklyEntries, unit, color, title, targetVal){
     </div>`;
 }
 
+// 값+단위 문자열을 '억' 단위 숫자로 변환
+function toEok(str){
+    const num=extractNumber(str);
+    const unit=extractUnit(str);
+    if(unit==='억') return num;
+    if(unit==='만원'||unit==='만') return num/10000;
+    if(unit==='원') return num/100000000;
+    // 단위 불명확 → 팀의 mainUnit 참조 필요, 일단 숫자 그대로 (억 가정)
+    return num;
+}
 function recalcCompanyFromTeams(){
     if(!DATA.teams||!DATA.company||!DATA.company.quarters) return;
     const qMap={'Q1':0,'Q2':1,'Q3':2,'Q4':3};
     const curQi=Math.floor(new Date().getMonth()/3);
-    // isRevenue KPI들만 분기별로 합산
+    // 팀별 분기 데이터(quarters)에서 직접 합산 (억 단위로 변환)
     const qSums=[0,0,0,0];
     DATA.teams.forEach(team=>{
-        if(!team.kpis) return;
-        team.kpis.forEach(k=>{
-            if(!k.isRevenue) return;
-            const val=extractNumber(k.current);
-            if(k.quarter && k.quarter!=='all' && qMap[k.quarter]!==undefined){
-                qSums[qMap[k.quarter]]+=val;
-            } else {
-                // 연간('all') KPI → 현재 분기에 반영
-                qSums[curQi]+=val;
+        if(!team.quarters) return;
+        team.quarters.forEach((q,i)=>{
+            if(i<4 && q.current){
+                qSums[i]+=toEok(q.current);
             }
         });
     });
@@ -2773,8 +2778,4 @@ function printDashboard(){
     // 인쇄 날짜 설정
     const now=new Date();
     const pd=document.getElementById('printDate');
-    if(pd) pd.textContent='출력일: '+now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
-    // 약간의 딜레이 후 인쇄
-    setTimeout(()=>{
-        window.print();
-        // 인쇄 후 transitio
+    if(pd) pd.textContent='출력일: '+now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekda
