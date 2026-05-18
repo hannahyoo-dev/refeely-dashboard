@@ -2778,4 +2778,29 @@ function printDashboard(){
     // 인쇄 날짜 설정
     const now=new Date();
     const pd=document.getElementById('printDate');
-    if(pd) pd.textContent='출력일: '+now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekda
+    if(pd) pd.textContent='출력일: '+now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+    // 약간의 딜레이 후 인쇄
+    setTimeout(()=>{
+        window.print();
+        // 인쇄 후 transition 복구
+        setTimeout(()=>{
+            document.querySelectorAll('[data-target]').forEach(el=>{
+                el.style.transition='';
+            });
+        },500);
+    },200);
+}
+
+// ===== INIT =====
+const now=new Date();
+document.getElementById('currentDate').textContent=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+renderTabs();
+renderContent();
+// 클라우드 연결 상태 확인 및 자동 동기화
+if(syncUrl){
+    updateSyncUI('connected','클라우드 연결됨');
+    pullFromCloud();
+}
+</script>
+</body>
+</html>
