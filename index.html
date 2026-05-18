@@ -1110,9 +1110,23 @@ function renderOverview(){
     const offset=circumference-(circumference*pct/100);
 
     let teamCards='';
+    const overviewQIdx=Math.floor(now.getMonth()/3);
+    const overviewQLabel=['Q1','Q2','Q3','Q4'][overviewQIdx];
     DATA.teams.forEach(t=>{
         const c=COLORS[t.colorIdx%COLORS.length];
-        const p=t.mainTarget>0?Math.round((t.mainCurrent/t.mainTarget)*100):0;
+        const cq=(t.quarters&&t.quarters[overviewQIdx]);
+        let p,curDisplay,tgtDisplay,goalLabel;
+        if(cq){
+            p=cq.percent||0;
+            curDisplay=cq.current||'0';
+            tgtDisplay=cq.target||'0';
+            goalLabel=t.mainGoal;
+        } else {
+            p=t.mainTarget>0?Math.round((t.mainCurrent/t.mainTarget)*100):0;
+            curDisplay=t.mainCurrent+(t.mainUnit||'');
+            tgtDisplay=t.mainTarget+(t.mainUnit||'');
+            goalLabel=t.mainGoal;
+        }
         teamCards+=`
         <div class="team-overview-card" onclick="switchTab('${t.id}')">
             <div class="card-accent" style="background:${c.grad}"></div>
@@ -1120,10 +1134,10 @@ function renderOverview(){
                 <div class="team-name"><span class="team-emoji">${t.emoji}</span>${t.name}</div>
                 <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:${c.bg};color:${c.main};white-space:nowrap">${p}%</span>
             </div>
-            <div class="team-main-goal">${t.mainGoal}</div>
-            <div class="team-metric"><span class="team-metric-value" style="color:${c.main}">${t.mainCurrent}</span><span class="team-metric-unit">${t.mainUnit} / ${t.mainTarget}${t.mainUnit}</span></div>
+            <div class="team-main-goal">${goalLabel}</div>
+            <div class="team-metric"><span class="team-metric-value" style="color:${c.main}">${curDisplay}</span><span class="team-metric-unit"> / ${tgtDisplay}</span></div>
             <div class="mini-progress"><div class="mini-progress-fill" style="width:0%;background:${c.grad}" data-target="${p}"></div></div>
-            <div class="mini-progress-label"><span style="color:${c.main}">${p}%</span><span style="color:var(--gray-400)">목표</span></div>
+            <div class="mini-progress-label"><span style="color:${c.main}">${p}%</span><span style="color:var(--gray-400)">${overviewQLabel} 목표</span></div>
         </div>`;
     });
 
@@ -2763,25 +2777,4 @@ function printDashboard(){
     // 약간의 딜레이 후 인쇄
     setTimeout(()=>{
         window.print();
-        // 인쇄 후 transition 복구
-        setTimeout(()=>{
-            document.querySelectorAll('[data-target]').forEach(el=>{
-                el.style.transition='';
-            });
-        },500);
-    },200);
-}
-
-// ===== INIT =====
-const now=new Date();
-document.getElementById('currentDate').textContent=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
-renderTabs();
-renderContent();
-// 클라우드 연결 상태 확인 및 자동 동기화
-if(syncUrl){
-    updateSyncUI('connected','클라우드 연결됨');
-    pullFromCloud();
-}
-</script>
-</body>
-</html>
+        // 인쇄 후 transitio
