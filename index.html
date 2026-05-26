@@ -2074,9 +2074,26 @@ function recalcKpiFromGoals(team){
     if(!team.kpis||!team.goals) return;
     // KPI별로 연결된 세부 목표 수집
     team.kpis.forEach((kpi,kIdx)=>{
+        // KPI에 직접 weeklyData가 있으면 recalcKpiFromWeekly가 처리하므로 건너뛰기
+        if(kpi.weeklyData && kpi.weeklyData.length>0) return;
         const linkedGoals=team.goals.filter(g=>g.linkedKpi===kIdx);
         if(linkedGoals.length===0) return; // 연결된 목표 없으면 수동 유지
-        // 합산
+        // aggType==='avg'이면 연결된 목표의 weeklyData에서 평균 계산
+        if(kpi.aggType==='avg'){
+            const allVals=[];
+            linkedGoals.forEach(g=>{
+                (g.weeklyData||[]).forEach(w=>allVals.push(w.value));
+            });
+            if(allVals.length>0){
+                const sum=allVals.reduce((s,v)=>s+v,0);
+                const avg=Math.round((sum/allVals.length)*100)/100;
+                kpi.current=autoFormatValue(avg,extractUnit(kpi.target)||team.mainUnit||'');
+                const tgtNum=extractNumber(kpi.target);
+                kpi.percent=tgtNum>0?Math.round((avg/tgtNum)*100):0;
+                return;
+            }
+        }
+        // 합산 (기본)
         let sumCurrent=0, sumTarget=0;
         linkedGoals.forEach(g=>{
             sumCurrent+=extractNumber(g.current);
