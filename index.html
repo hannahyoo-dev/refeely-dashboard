@@ -1483,9 +1483,11 @@ function renderTeamPage(team){
         const curNum=extractNumber(aq.current);
         const tgtUnit=extractUnit(aq.target);
         const curUnit=extractUnit(aq.current);
-        // 단위 통일해서 남은 금액 계산 (목표 단위 기준)
+        // 단위 통일해서 남은 수량/금액 계산 (목표 단위 기준)
+        const isMoneyQ=MONEY_UNITS.includes(tgtUnit) && MONEY_UNITS.includes(curUnit);
+        const remainLabel=isMoneyQ?'남은 금액':'남은 수량';
         let remainDisplay='';
-        if(MONEY_UNITS.includes(tgtUnit) && MONEY_UNITS.includes(curUnit)){
+        if(isMoneyQ){
             const tgtWon=toWon(tgtNum,tgtUnit);
             const curWon=toWon(curNum,curUnit);
             const remainWon=Math.max(0,tgtWon-curWon);
@@ -1507,7 +1509,7 @@ function renderTeamPage(team){
             <div style="display:flex;gap:20px;margin-bottom:18px;flex-wrap:wrap">
                 <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">현재 달성</div><div style="font-size:26px;font-weight:900;color:${c.main}">${aq.current}</div></div>
                 <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">목표</div><div style="font-size:26px;font-weight:900;color:var(--gray-700)">${aq.target}</div></div>
-                <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">남은 금액</div><div style="font-size:26px;font-weight:900;color:#AA9587">${remainDisplay}</div></div>
+                <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">${remainLabel}</div><div style="font-size:26px;font-weight:900;color:#AA9587">${remainDisplay}</div></div>
                 <div style="margin-left:auto;display:flex;align-items:center"><div style="font-size:36px;font-weight:900;color:${c.main}">${aq.percent}<span style="font-size:18px;font-weight:700">%</span></div></div>
             </div>
             <div class="progress-track" style="height:16px"><div class="progress-fill" style="width:0%;background:${c.grad}" data-target="${aq.percent}"></div><span class="progress-pct">${aq.percent}%</span></div>
