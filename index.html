@@ -2873,6 +2873,7 @@ document.getElementById('currentDate').textContent=now.toLocaleDateString('ko-KR
 DATA.teams.forEach(t=>{
     if(t.kpis){
         t.kpis.forEach(k=>{ if(k.weeklyData&&k.weeklyData.length>0) recalcKpiFromWeekly(k,t); });
+        if(t.goals) recalcKpiFromGoals(t);
         recalcFromPrimaryKpis(t);
     }
 });
