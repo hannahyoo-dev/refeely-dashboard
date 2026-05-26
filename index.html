@@ -568,16 +568,18 @@ function sortWeeklyData(wd){
 
 // ===== WEEKLY TREND CHART (전사 주차별 추이) =====
 function aggregateWeeklyData(){
-    // 모든 팀의 isRevenue KPI 주간 데이터를 주차별로 합산
+    // 모든 팀의 isRevenue KPI 주간 데이터를 주차별로 합산 (억 단위로 통일)
     const weekMap=new Map(); // label -> {sum, weekStart}
     if(!DATA.teams) return [];
     DATA.teams.forEach(team=>{
         if(!team.kpis) return;
+        const mu=team.mainUnit||'억';
         team.kpis.forEach(kpi=>{
             if(!kpi.isRevenue||!kpi.weeklyData) return;
             kpi.weeklyData.forEach(w=>{
                 const existing=weekMap.get(w.label)||{sum:0,label:w.label};
-                existing.sum+=w.value;
+                // 팀의 mainUnit 기준 값을 억으로 변환하여 합산
+                existing.sum+=toWon(w.value,mu)/1e8;
                 weekMap.set(w.label,existing);
             });
         });
