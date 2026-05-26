@@ -926,6 +926,15 @@ async function pullFromCloud(){
         const json = await jsonpCall(syncUrl, {action:'read'});
         if(json.success && json.data && isValidDashboardData(json.data)){
             DATA=json.data;
+            // 클라우드 데이터 로드 후 KPI 재계산 (평균/합산 + 단위 통일)
+            DATA.teams.forEach(t=>{
+                if(t.kpis){
+                    t.kpis.forEach(k=>{ if(k.weeklyData&&k.weeklyData.length>0) recalcKpiFromWeekly(k,t); });
+                    if(t.goals) recalcKpiFromGoals(t);
+                    recalcFromPrimaryKpis(t);
+                }
+            });
+            recalcCompanyFromTeams();
             localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));
             renderTabs();renderContent();
             updateSyncUI('connected','클라우드 연결됨');
