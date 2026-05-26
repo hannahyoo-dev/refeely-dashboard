@@ -722,9 +722,12 @@ function recalcCompanyFromTeams(){
     if(!DATA.teams||!DATA.company||!DATA.company.quarters) return;
     const qMap={'Q1':0,'Q2':1,'Q3':2,'Q4':3};
     const curQi=Math.floor(new Date().getMonth()/3);
-    // 팀별 분기 데이터(quarters)에서 직접 합산 (억 단위로 변환)
+    // 매출 KPI(isRevenue)가 있는 팀만 분기 매출에 합산
     const qSums=[0,0,0,0];
     DATA.teams.forEach(team=>{
+        // 이 팀에 매출 반영 KPI가 하나라도 있는지 확인
+        const hasRevenue=(team.kpis||[]).some(k=>k.isRevenue);
+        if(!hasRevenue) return; // 매출 KPI 없는 팀은 건너뛰기
         if(!team.quarters) return;
         team.quarters.forEach((q,i)=>{
             if(i<4 && q.current){
@@ -2231,7 +2234,7 @@ function renderWeeklyChart(team,kpi,kIdx,color){
     wd.forEach((w,i)=>{
         let changeCell='-';
         if(i>0){
-            const d=w.value-wd[i-1].value;
+            const d=Math.round((w.value-wd[i-1].value)*10000)/10000;
             const p=wd[i-1].value>0?Math.round((d/wd[i-1].value)*100):0;
             if(d>0) changeCell='<span style="color:#3BA876;font-weight:700">▲ +'+d+' (+'+p+'%)</span>';
             else if(d<0) changeCell='<span style="color:#dc2626;font-weight:700">▼ '+d+' ('+p+'%)</span>';
@@ -2281,10 +2284,12 @@ function recalcKpiFromWeekly(kpi,team){
     const wd=kpi.weeklyData;
     if(!wd||wd.length===0) return;
     const sum=wd.reduce((s,w)=>s+w.value,0);
-    const unit=team.mainUnit||extractUnit(kpi.current)||'';
-    kpi.current=autoFormatValue(sum,unit);
+    const isAvg=kpi.aggType==='avg';
+    const val=isAvg?Math.round((sum/wd.length)*100)/100:sum;
+    const unit=extractUnit(kpi.current)||extractUnit(kpi.target)||team.mainUnit||'';
+    kpi.current=autoFormatValue(val,unit);
     const tgtNum=extractNumber(kpi.target);
-    kpi.percent=tgtNum>0?Math.round((sum/tgtNum)*100):0;
+    kpi.percent=tgtNum>0?Math.round((val/tgtNum)*100):0;
 }
 
 function addWeeklyData(teamId,kIdx){
@@ -2412,7 +2417,7 @@ function renderGoalWeeklyChart(team,goal,gIdx,color){
     wd.forEach((w,i)=>{
         let changeCell='-';
         if(i>0){
-            const d=w.value-wd[i-1].value;
+            const d=Math.round((w.value-wd[i-1].value)*10000)/10000;
             const p=wd[i-1].value>0?Math.round((d/wd[i-1].value)*100):0;
             if(d>0) changeCell='<span style="color:#3BA876;font-weight:700">▲ +'+d+' (+'+p+'%)</span>';
             else if(d<0) changeCell='<span style="color:#dc2626;font-weight:700">▼ '+d+' ('+p+'%)</span>';
