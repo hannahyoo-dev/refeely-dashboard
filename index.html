@@ -2852,8 +2852,13 @@ function printDashboard(){
 // ===== INIT =====
 const now=new Date();
 document.getElementById('currentDate').textContent=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
-// 페이지 로딩 시 모든 팀 재계산 (단위 통일)
-DATA.teams.forEach(t=>{ if(t.kpis) recalcFromPrimaryKpis(t); });
+// 페이지 로딩 시 모든 KPI 재계산 (평균/합산 + 단위 통일)
+DATA.teams.forEach(t=>{
+    if(t.kpis){
+        t.kpis.forEach(k=>{ if(k.weeklyData&&k.weeklyData.length>0) recalcKpiFromWeekly(k,t); });
+        recalcFromPrimaryKpis(t);
+    }
+});
 recalcCompanyFromTeams();
 localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
 renderTabs();
