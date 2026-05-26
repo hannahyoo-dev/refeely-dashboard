@@ -2318,10 +2318,20 @@ function recalcKpiFromWeekly(kpi,team){
     const sum=wd.reduce((s,w)=>s+w.value,0);
     const isAvg=kpi.aggType==='avg';
     const val=isAvg?Math.round((sum/wd.length)*100)/100:sum;
-    const unit=extractUnit(kpi.current)||extractUnit(kpi.target)||team.mainUnit||'';
-    kpi.current=autoFormatValue(val,unit);
+    // weeklyData 기준 단위: 금액 KPI면 team.mainUnit, 아니면 target 단위
+    const tgtUnit=extractUnit(kpi.target)||'';
+    const isMoneyKpi=MONEY_UNITS.includes(tgtUnit)||MONEY_UNITS.includes(team.mainUnit);
+    const baseUnit=isMoneyKpi?(team.mainUnit||tgtUnit):(tgtUnit||extractUnit(kpi.current)||'');
+    kpi.current=autoFormatValue(val,baseUnit);
+    // 달성률: 금액이면 원 단위로 통일해서 비교
     const tgtNum=extractNumber(kpi.target);
-    kpi.percent=tgtNum>0?Math.round((val/tgtNum)*100):0;
+    if(isMoneyKpi&&MONEY_UNITS.includes(baseUnit)&&MONEY_UNITS.includes(tgtUnit)){
+        const valWon=toWon(val,baseUnit);
+        const tgtWon=toWon(tgtNum,tgtUnit);
+        kpi.percent=tgtWon>0?Math.round((valWon/tgtWon)*100):0;
+    } else {
+        kpi.percent=tgtNum>0?Math.round((val/tgtNum)*100):0;
+    }
 }
 
 function addWeeklyData(teamId,kIdx){
