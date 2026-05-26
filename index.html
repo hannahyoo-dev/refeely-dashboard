@@ -2486,15 +2486,15 @@ function openWeeklyBulkInput(teamId){
     const t=DATA.teams.find(x=>x.id===teamId);if(!t)return;
     const c=COLORS[t.colorIdx%COLORS.length];
     const now=new Date();
-    function getMonday(d){ const dt=new Date(d); const day=dt.getDay(); const diff=dt.getDate()-day+(day===0?-6:1); dt.setDate(diff); dt.setHours(0,0,0,0); return dt; }
+    function getSunday(d){ const dt=new Date(d); const day=dt.getDay(); dt.setDate(dt.getDate()-day); dt.setHours(0,0,0,0); return dt; }
     function fmtMD(d){ return (d.getMonth()+1)+'월 '+d.getDate()+'일'; }
-    function weekLabel(mon){
-        const sun=new Date(mon); sun.setDate(mon.getDate()+6);
-        const m=mon.getMonth()+1;
+    function weekLabel(sun){
+        const sat=new Date(sun); sat.setDate(sun.getDate()+6);
+        const m=sun.getMonth()+1;
         const weekNames=['첫째','둘째','셋째','넷째','다섯째'];
-        const wIdx=Math.ceil(mon.getDate()/7)-1;
+        const wIdx=Math.ceil(sun.getDate()/7)-1;
         const wName=weekNames[Math.min(wIdx,4)];
-        return { value: fmtMD(mon)+' ~ '+fmtMD(sun), display: m+'월 '+wName+'주 ('+fmtMD(mon)+' ~ '+fmtMD(sun)+')' };
+        return { value: fmtMD(sun)+' ~ '+fmtMD(sat), display: m+'월 '+wName+'주 ('+fmtMD(sun)+' ~ '+fmtMD(sat)+')' };
     }
     // 해당 주차에 이미 데이터가 있는지 확인
     function hasDataForWeek(label){
@@ -2502,11 +2502,11 @@ function openWeeklyBulkInput(teamId){
         const inGoal=t.goals.some(g=>g.weeklyData&&g.weeklyData.some(w=>w.label===label));
         return inKpi||inGoal;
     }
-    const thisMon=getMonday(now);
+    const thisSun=getSunday(now);
     let weekOptions='';
     for(let w=-4;w<=4;w++){
-        const mon=new Date(thisMon); mon.setDate(thisMon.getDate()+w*7);
-        const wk=weekLabel(mon);
+        const sun=new Date(thisSun); sun.setDate(thisSun.getDate()+w*7);
+        const wk=weekLabel(sun);
         const exists=hasDataForWeek(wk.value);
         weekOptions+=`<option value="${wk.value}" ${w===0?'selected':''}>${exists?'✅ ':''}${wk.display}</option>`;
     }
