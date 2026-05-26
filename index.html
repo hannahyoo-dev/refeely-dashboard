@@ -1466,7 +1466,20 @@ function renderTeamPage(team){
         const isCurQ=aqIdx===currentQ;
         const tgtNum=extractNumber(aq.target);
         const curNum=extractNumber(aq.current);
-        const remain=Math.round((tgtNum-curNum)*100)/100;
+        const tgtUnit=extractUnit(aq.target);
+        const curUnit=extractUnit(aq.current);
+        // 단위 통일해서 남은 금액 계산 (목표 단위 기준)
+        let remainDisplay='';
+        if(MONEY_UNITS.includes(tgtUnit) && MONEY_UNITS.includes(curUnit)){
+            const tgtWon=tgtUnit==='억'?tgtNum*100000000:tgtUnit==='만원'||tgtUnit==='만'?tgtNum*10000:tgtNum;
+            const curWon=curUnit==='억'?curNum*100000000:curUnit==='만원'||curUnit==='만'?curNum*10000:curNum;
+            const remainWon=Math.max(0,tgtWon-curWon);
+            const fmt=formatMoney(remainWon,'원');
+            remainDisplay=fmt?fmt.display:Math.round(remainWon)+'원';
+        } else {
+            const remain=Math.round((tgtNum-curNum)*100)/100;
+            remainDisplay=autoFormatValue(remain>0?remain:0,tgtUnit||team.mainUnit||'');
+        }
 
         quarterHtml=`
         <div style="display:flex;gap:4px;padding:4px;background:var(--gray-50);border-radius:12px;margin-bottom:16px">${qTabs}</div>
@@ -1479,7 +1492,7 @@ function renderTeamPage(team){
             <div style="display:flex;gap:20px;margin-bottom:18px;flex-wrap:wrap">
                 <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">현재 달성</div><div style="font-size:26px;font-weight:900;color:${c.main}">${aq.current}</div></div>
                 <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">목표</div><div style="font-size:26px;font-weight:900;color:var(--gray-700)">${aq.target}</div></div>
-                <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">남은 금액</div><div style="font-size:26px;font-weight:900;color:#AA9587">${autoFormatValue(remain>0?remain:0,team.mainUnit||'')}</div></div>
+                <div><div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">남은 금액</div><div style="font-size:26px;font-weight:900;color:#AA9587">${remainDisplay}</div></div>
                 <div style="margin-left:auto;display:flex;align-items:center"><div style="font-size:36px;font-weight:900;color:${c.main}">${aq.percent}<span style="font-size:18px;font-weight:700">%</span></div></div>
             </div>
             <div class="progress-track" style="height:16px"><div class="progress-fill" style="width:0%;background:${c.grad}" data-target="${aq.percent}"></div><span class="progress-pct">${aq.percent}%</span></div>
@@ -1502,6 +1515,7 @@ function renderTeamPage(team){
         const primaryTag=isPrimary?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#50CC93;color:white;margin-left:6px">⭐ 대표</span>':'';
         const revenueTag=isRevenue?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#5B7FD6;color:white;margin-left:6px">💰 매출</span>':'';
         const qTag=(k.quarter&&k.quarter!=='all')?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+c.bg+';color:'+c.main+';margin-left:6px">'+k.quarter+'</span>':'';
+        const aggTag=k.aggType==='avg'?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#FEF3C7;color:#D97706;margin-left:6px">평균</span>':'';
         const selectedStyle=isSelected?'border-color:'+c.main+';box-shadow:0 0 0 3px '+c.main+'22;background:'+c.bg+'33;':'';
         const primaryBorder=(!isSelected&&isPrimary)?'border-color:'+c.main+'55;':'';
         const hasWeekly=getKpiWeeklyData(team,k,k._idx).length>0;
@@ -1511,7 +1525,7 @@ function renderTeamPage(team){
             ${selectedIcon}
             <button class="edit-btn" onclick="event.stopPropagation();openKpiModal('${team.id}',${i})">✏️</button>
             <button class="delete-btn" onclick="event.stopPropagation();deleteKpi('${team.id}',${i})">🗑</button>
-            <div class="kpi-title">${k.title}${primaryTag}${revenueTag}${qTag}</div>
+            <div class="kpi-title">${k.title}${primaryTag}${revenueTag}${qTag}${aggTag}</div>
             <div class="kpi-row"><div class="kpi-value" style="color:${c.main}">${k.current}</div><div class="kpi-target">${k.target}</div></div>
             <div class="kpi-progress"><div class="progress-track"><div class="progress-fill" style="width:0%;background:${c.grad}" data-target="${k.percent}"></div><span class="progress-pct">${k.percent}%</span></div></div>
             ${hint}
@@ -1811,6 +1825,19 @@ function openKpiModal(teamId,idx){
                 </div>
             </div>
         </div>
+        <div class="form-group" style="margin-bottom:16px">
+            <label class="form-label">📊 주간 데이터 집계 방식</label>
+            <div style="display:flex;gap:8px">
+                <label style="flex:1;padding:12px 16px;border-radius:10px;border:1.5px solid ${(k.aggType||'sum')==='sum'?'#50CC93':'var(--gray-200)'};background:${(k.aggType||'sum')==='sum'?'#EEFBF4':'white'};cursor:pointer;display:flex;align-items:center;gap:8px" onclick="document.getElementById('m_kagg_sum').checked=true;this.style.borderColor='#50CC93';this.style.background='#EEFBF4';this.nextElementSibling.style.borderColor='var(--gray-200)';this.nextElementSibling.style.background='white'">
+                    <input type="radio" name="m_kagg" id="m_kagg_sum" value="sum" ${(k.aggType||'sum')==='sum'?'checked':''} style="accent-color:#50CC93">
+                    <div><div style="font-size:13px;font-weight:700">합산</div><div style="font-size:11px;color:var(--gray-400)">매출, 건수 등</div></div>
+                </label>
+                <label style="flex:1;padding:12px 16px;border-radius:10px;border:1.5px solid ${k.aggType==='avg'?'#5B7FD6':'var(--gray-200)'};background:${k.aggType==='avg'?'#EEF2FB':'white'};cursor:pointer;display:flex;align-items:center;gap:8px" onclick="document.getElementById('m_kagg_avg').checked=true;this.style.borderColor='#5B7FD6';this.style.background='#EEF2FB';this.previousElementSibling.style.borderColor='var(--gray-200)';this.previousElementSibling.style.background='white'">
+                    <input type="radio" name="m_kagg" id="m_kagg_avg" value="avg" ${k.aggType==='avg'?'checked':''} style="accent-color:#5B7FD6">
+                    <div><div style="font-size:13px;font-weight:700">평균</div><div style="font-size:11px;color:var(--gray-400)">불량률, 달성률 등</div></div>
+                </label>
+            </div>
+        </div>
         <div class="modal-actions">
             <button class="btn btn-cancel" onclick="closeModal()">취소</button>
             <button class="btn btn-primary" onclick="saveKpi('${teamId}',${idx})">${isNew?'추가':'저장'}</button>
@@ -1897,6 +1924,7 @@ function saveKpi(teamId,idx){
     const tgtN=parseFloat(document.getElementById('m_ktn').value)||0;
     const unit=document.getElementById('m_ku').value;
     const pct=parseInt(document.getElementById('m_kp').textContent)||0;
+    const aggType=document.querySelector('input[name="m_kagg"]:checked');
     const obj={
         title:document.getElementById('m_kt').value,
         current:autoFormatValue(curN,unit),
@@ -1904,7 +1932,8 @@ function saveKpi(teamId,idx){
         percent:pct,
         quarter:document.getElementById('m_kq').value,
         isPrimary:document.getElementById('m_kpri').checked,
-        isRevenue:document.getElementById('m_krev').checked
+        isRevenue:document.getElementById('m_krev').checked,
+        aggType:aggType?aggType.value:'sum'
     };
     if(idx<0) t.kpis.push(obj); else { const old=t.kpis[idx]; Object.assign(obj,{weeklyData:old.weeklyData,goals:old.goals}); t.kpis[idx]=obj; }
     // 대표 KPI 합산 → 분기 달성 + 팀 메인 지표 자동 연동
@@ -1922,29 +1951,41 @@ function recalcFromPrimaryKpis(team){
     const qSums=[0,0,0,0];
     const qTargetSums=[0,0,0,0];
     let totalSum=0;
+    // KPI 값을 '원' 단위로 통일해서 합산
     primaryKpis.forEach(k=>{
         const val=extractNumber(k.current);
+        const valUnit=extractUnit(k.current);
         const tgt=extractNumber(k.target);
+        const tgtU=extractUnit(k.target);
+        // 원 단위로 변환
+        const valWon=valUnit==='억'?val*1e8:valUnit==='만원'||valUnit==='만'?val*1e4:MONEY_UNITS.includes(team.mainUnit)?(team.mainUnit==='억'?val*1e8:team.mainUnit==='만원'?val*1e4:val):val;
+        const tgtWon=tgtU==='억'?tgt*1e8:tgtU==='만원'||tgtU==='만'?tgt*1e4:MONEY_UNITS.includes(team.mainUnit)?(team.mainUnit==='억'?tgt*1e8:team.mainUnit==='만원'?tgt*1e4:tgt):tgt;
         if(k.quarter && k.quarter!=='all' && qMap[k.quarter]!==undefined){
-            // 특정 분기에 배정된 KPI
-            qSums[qMap[k.quarter]]+=val;
-            qTargetSums[qMap[k.quarter]]+=tgt;
+            qSums[qMap[k.quarter]]+=valWon;
+            qTargetSums[qMap[k.quarter]]+=tgtWon;
         } else {
-            // 'all' (연간) KPI → 현재 분기에 반영
-            qSums[curQi]+=val;
-            qTargetSums[curQi]+=tgt;
+            qSums[curQi]+=valWon;
+            qTargetSums[curQi]+=tgtWon;
         }
-        totalSum+=val;
+        totalSum+=valWon;
     });
-    // 팀 메인 지표 업데이트
-    team.mainCurrent=Math.round(totalSum*100)/100;
+    // 팀 메인 지표 업데이트 (mainUnit 기준으로 변환)
+    if(team.mainUnit==='억') team.mainCurrent=Math.round(totalSum/1e8*100)/100;
+    else if(team.mainUnit==='만원') team.mainCurrent=Math.round(totalSum/1e4*100)/100;
+    else team.mainCurrent=Math.round(totalSum*100)/100;
     // 분기별 달성 업데이트
     if(team.quarters){
         for(let i=0;i<4;i++){
             if(team.quarters[i] && qSums[i]>0){
-                team.quarters[i].current=autoFormatValue(qSums[i],team.mainUnit);
-                const tgtNum=extractNumber(team.quarters[i].target);
-                team.quarters[i].percent=tgtNum>0?Math.round((qSums[i]/tgtNum)*100):0;
+                // 분기 목표의 단위에 맞춰서 현재 달성 표시
+                const qTgtUnit=extractUnit(team.quarters[i].target)||team.mainUnit||'';
+                let curVal=qSums[i];
+                if(qTgtUnit==='억') curVal=Math.round(qSums[i]/1e8*100)/100;
+                else if(qTgtUnit==='만원'||qTgtUnit==='만') curVal=Math.round(qSums[i]/1e4*100)/100;
+                team.quarters[i].current=autoFormatValue(curVal,qTgtUnit);
+                // 퍼센트: 원 단위 기준으로 계산
+                const qTgtWon=qTgtUnit==='억'?extractNumber(team.quarters[i].target)*1e8:qTgtUnit==='만원'||qTgtUnit==='만'?extractNumber(team.quarters[i].target)*1e4:extractNumber(team.quarters[i].target);
+                team.quarters[i].percent=qTgtWon>0?Math.round((qSums[i]/qTgtWon)*100):0;
             }
         }
     }
@@ -2065,20 +2106,25 @@ function toggleKpiChart(teamId,idx){
 }
 
 function getKpiWeeklyData(team,kpi,kIdx){
-    // KPI에 연결된 세부 목표가 있으면 목표들의 weeklyData를 주차별로 합산
+    const isAvg=kpi.aggType==='avg';
+    // KPI에 연결된 세부 목표가 있으면 목표들의 weeklyData를 집계
     const linkedGoals=(team.goals||[]).filter(g=>g.linkedKpi===kIdx);
     if(linkedGoals.length>0){
         const weekMap=new Map();
         linkedGoals.forEach(g=>{
             (g.weeklyData||[]).forEach(w=>{
-                const existing=weekMap.get(w.label)||{value:0,links:[]};
+                const existing=weekMap.get(w.label)||{value:0,count:0,links:[]};
                 existing.value+=w.value;
+                existing.count+=1;
                 if(w.link) existing.links.push({goal:g.title,link:w.link});
                 weekMap.set(w.label, existing);
             });
         });
         if(weekMap.size>0){
-            const entries=Array.from(weekMap.entries()).map(([label,data])=>({label,value:Math.round(data.value*100)/100,links:data.links}));
+            const entries=Array.from(weekMap.entries()).map(([label,data])=>{
+                const val=isAvg&&data.count>0?data.value/data.count:data.value;
+                return {label,value:Math.round(val*100)/100,links:data.links};
+            });
             return sortWeeklyData(entries);
         }
     }
@@ -2663,10 +2709,17 @@ function saveQuarter(teamId,idx){
         const curN=parseFloat(document.getElementById('m_qqcn').value)||0;
         t.quarters[idx].current=autoFormatValue(curN,unit);
     }
-    // 달성률 재계산
-    const tgtNum=extractNumber(t.quarters[idx].target);
-    const curNum=extractNumber(t.quarters[idx].current);
-    t.quarters[idx].percent=tgtNum>0?Math.round((curNum/tgtNum)*100):0;
+    // 달성률 재계산 (단위 통일)
+    const _tN=extractNumber(t.quarters[idx].target);
+    const _cN=extractNumber(t.quarters[idx].current);
+    const _tU=extractUnit(t.quarters[idx].target);
+    const _cU=extractUnit(t.quarters[idx].current);
+    let _tW=_tN, _cW=_cN;
+    if(MONEY_UNITS.includes(_tU)&&MONEY_UNITS.includes(_cU)){
+        _tW=_tU==='억'?_tN*1e8:_tU==='만원'||_tU==='만'?_tN*1e4:_tN;
+        _cW=_cU==='억'?_cN*1e8:_cU==='만원'||_cU==='만'?_cN*1e4:_cN;
+    }
+    t.quarters[idx].percent=_tW>0?Math.round((_cW/_tW)*100):0;
     saveData();closeModal();renderContent();
 }
 
@@ -2794,6 +2847,10 @@ function printDashboard(){
 // ===== INIT =====
 const now=new Date();
 document.getElementById('currentDate').textContent=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+// 페이지 로딩 시 모든 팀 재계산 (단위 통일)
+DATA.teams.forEach(t=>{ if(t.kpis) recalcFromPrimaryKpis(t); });
+recalcCompanyFromTeams();
+localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
 renderTabs();
 renderContent();
 // 클라우드 연결 상태 확인 및 자동 동기화
