@@ -2551,8 +2551,8 @@ function openWeeklyBulkInput(teamId){
         return {kH,gH};
     };
 
-    const initRows=window._bulkBuildRows(weekLabel(thisMon).value);
-    const isEdit=hasDataForWeek(weekLabel(thisMon).value);
+    const initRows=window._bulkBuildRows(weekLabel(thisSun).value);
+    const isEdit=hasDataForWeek(weekLabel(thisSun).value);
 
     openModal(`
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
