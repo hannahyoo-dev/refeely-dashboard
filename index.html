@@ -349,6 +349,7 @@ body.dark-mode .banner-sub{color:var(--gray-500) !important;}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
         <button class="sync-settings-btn" onclick="openSyncModal()">☁️ 동기화 설정</button>
+        <button class="sync-btn" id="sheetSyncBtn" onclick="syncFromSheet()" title="매출 시트에서 데이터 가져오기" style="background:#34a853;color:white;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">📊 시트 연동</button>
         <button class="sync-btn" onclick="exportToCSV()" title="CSV 내보내기">📥 CSV</button>
         <button class="sync-btn" onclick="printDashboard()" title="인쇄/PDF">🖨️ 인쇄</button>
         <button class="dark-toggle" id="darkToggle" onclick="toggleDarkMode()" title="다크 모드">🌙</button>
@@ -425,6 +426,11 @@ let selectedQuarter = 'all';
 const DEFAULT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbxsKYQStRCGCQZhjLNuEC77_QK_Eg_yynRKi-xIdwMpIcGIChhF88nS835AP1t6-HF5/exec';
 let syncUrl = localStorage.getItem(SYNC_URL_KEY) || DEFAULT_SYNC_URL;
 let isSyncing = false;
+
+// ===== 시트 연동 설정 =====
+const SHEET_SYNC_URL_KEY = 'refeelySheetSyncUrl';
+let sheetSyncUrl = localStorage.getItem(SHEET_SYNC_URL_KEY) || '';
+let isSheetSyncing = false;
 
 // ===== DARK MODE =====
 function toggleDarkMode(){
@@ -957,6 +963,159 @@ async function pullFromCloud(){
 function manualSync(){
     if(syncUrl) pullFromCloud();
     else openSyncModal();
+}
+
+// ===== 시트 연동 (Google Sheets → 대시보드) =====
+function openSheetSyncModal(){
+    const html=`
+    <div class="modal-overlay" onclick="if(event.target===this)this.remove()">
+        <div class="modal" style="max-width:520px">
+            <div class="modal-header">
+                <div class="modal-title">📊 Google Sheets 연동 설정</div>
+                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+            </div>
+            <div style="padding:20px">
+                <div style="margin-bottom:16px;font-size:13px;color:var(--gray-500);line-height:1.6">
+                    매출 시트(TOTAL 탭)에서 주차별 데이터를 자동으로 가져옵니다.<br>
+                    Google Sheets에 Apps Script를 배포한 후, 웹 앱 URL을 아래에 입력하세요.
+                </div>
+                <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:6px">웹 앱 URL</label>
+                <input type="text" id="sheetSyncUrlInput" value="${sheetSyncUrl}" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%;padding:10px 14px;border:1px solid var(--gray-300);border-radius:10px;font-size:13px;margin-bottom:16px">
+                <div style="display:flex;gap:10px">
+                    <button onclick="saveSheetSyncUrl()" style="flex:1;padding:10px;border-radius:10px;border:none;background:#34a853;color:white;font-size:14px;font-weight:700;cursor:pointer">저장</button>
+                    <button onclick="saveSheetSyncUrl();syncFromSheet()" style="flex:1;padding:10px;border-radius:10px;border:none;background:#1a73e8;color:white;font-size:14px;font-weight:700;cursor:pointer">저장 & 동기화</button>
+                </div>
+                ${sheetSyncUrl?'<div style="margin-top:12px;font-size:11px;color:var(--gray-400)">마지막 동기화: '+(localStorage.getItem('refeelySheetLastSync')||'없음')+'</div>':''}
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function saveSheetSyncUrl(){
+    const input=document.getElementById('sheetSyncUrlInput');
+    if(input){
+        sheetSyncUrl=input.value.trim();
+        localStorage.setItem(SHEET_SYNC_URL_KEY,sheetSyncUrl);
+        const overlay=input.closest('.modal-overlay');
+        if(overlay) overlay.remove();
+        showToast('시트 연동 URL이 저장되었습니다','success');
+    }
+}
+
+async function syncFromSheet(){
+    if(!sheetSyncUrl){
+        openSheetSyncModal();
+        return;
+    }
+    if(isSheetSyncing) return;
+    isSheetSyncing=true;
+    const btn=document.getElementById('sheetSyncBtn');
+    if(btn) btn.textContent='⏳ 동기화 중...';
+    try{
+        const json=await jsonpCall(sheetSyncUrl,{});
+        if(!json.success){
+            throw new Error(json.error||'시트 데이터를 가져올 수 없습니다');
+        }
+        const sheetData=json.data;
+        // D2C 팀 찾기 (이름에 'D2C' 포함)
+        const d2cTeam=DATA.teams.find(t=>t.name&&t.name.toUpperCase().includes('D2C'));
+        // B2B 팀 찾기 (이름에 'B2B' 포함)
+        const b2bTeam=DATA.teams.find(t=>t.name&&t.name.toUpperCase().includes('B2B'));
+
+        let updatedChannels=0;
+        let totalWeeks=0;
+        // 시트에서 보내온 단위 정보 (없으면 '만원' 기본값)
+        const sheetUnits=sheetData.units||{};
+
+        // 팀별 채널 KPI 동기화 함수
+        function syncTeamChannels(team, channelsData, fromUnit){
+            if(!team||!channelsData) return;
+            if(!team.kpis) team.kpis=[];
+            const toUnit=team.mainUnit||'억';
+            const needConvert=fromUnit&&fromUnit!==toUnit&&MONEY_UNITS.includes(fromUnit)&&MONEY_UNITS.includes(toUnit);
+            const channelNames=Object.keys(channelsData);
+            channelNames.forEach(chName=>{
+                const weeklyData=channelsData[chName];
+                if(!weeklyData||weeklyData.length===0) return;
+                if(totalWeeks===0) totalWeeks=weeklyData.length;
+                // 기존 채널 KPI 찾기 (sheetChannel로 식별)
+                let kpi=team.kpis.find(k=>k.sheetChannel===chName);
+                if(!kpi){
+                    // 기존에 같은 이름의 KPI가 있는지 확인
+                    kpi=team.kpis.find(k=>k.name===chName&&!k.sheetChannel);
+                    if(kpi){
+                        kpi.sheetChannel=chName; // 기존 KPI에 태그 추가
+                    } else {
+                        // 새 KPI 생성
+                        kpi={
+                            name:chName,
+                            target:'0'+toUnit,
+                            current:'0'+toUnit,
+                            percent:0,
+                            isRevenue:true,
+                            isPrimary:true,
+                            sheetChannel:chName,
+                            weeklyData:[]
+                        };
+                        team.kpis.push(kpi);
+                    }
+                }
+                // weeklyData 업데이트 (시트 단위 → 팀 mainUnit 변환)
+                if(needConvert){
+                    kpi.weeklyData=weeklyData.map(w=>{
+                        const won=toWon(w.value,fromUnit);
+                        let v;
+                        if(toUnit==='억') v=Math.round(won/1e8*100)/100;
+                        else if(toUnit==='천만원') v=Math.round(won/1e7*100)/100;
+                        else if(toUnit==='만원') v=Math.round(won/1e4*100)/100;
+                        else v=Math.round(won);
+                        return {label:w.label,value:v};
+                    });
+                } else {
+                    kpi.weeklyData=weeklyData;
+                }
+                kpi.isRevenue=true;
+                kpi.isPrimary=true;
+                recalcKpiFromWeekly(kpi,team);
+                updatedChannels++;
+            });
+            // 기존 통합 매출 KPI가 있으면 isPrimary=false로 변경 (중복 합산 방지)
+            team.kpis.forEach(k=>{
+                if(k.isRevenue && !k.sheetChannel && channelNames.length>0){
+                    k.isPrimary=false;
+                    k.isRevenue=false;
+                }
+            });
+        }
+
+        // D2C 채널별 동기화 (시트 단위 → 팀 mainUnit 자동 변환)
+        syncTeamChannels(d2cTeam, sheetData.d2c, sheetUnits.d2c||'만원');
+        // B2B 채널별 동기화
+        syncTeamChannels(b2bTeam, sheetData.b2b, sheetUnits.b2b||'만원');
+
+        if(updatedChannels>0){
+            // 팀별 분기 실적 재계산
+            DATA.teams.forEach(t=>{
+                if(t.kpis){
+                    recalcFromPrimaryKpis(t);
+                }
+            });
+            recalcCompanyFromTeams();
+            localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));
+            renderTabs();renderContent();
+            localStorage.setItem('refeelySheetLastSync',new Date().toLocaleString('ko-KR'));
+            showToast('매출 시트에서 '+updatedChannels+'개 채널 데이터를 가져왔습니다 ('+totalWeeks+'주차)','success');
+        } else {
+            showToast('연동할 팀 또는 채널을 찾을 수 없습니다. 팀 이름에 B2B/D2C가 포함되어 있는지 확인하세요.','error');
+        }
+
+    }catch(e){
+        showToast('시트 연동 실패: '+e.message,'error');
+    }finally{
+        isSheetSyncing=false;
+        if(btn) btn.textContent='📊 시트 연동';
+    }
 }
 
 // ===== EDIT MODE =====
