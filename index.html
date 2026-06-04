@@ -1028,59 +1028,65 @@ async function syncFromSheet(){
         // 시트에서 보내온 단위 정보 (없으면 '만원' 기본값)
         const sheetUnits=sheetData.units||{};
 
-        // 팀별 채널 KPI 동기화 함수
+        // 팀별 채널 KPI 동기화 함수 (분기별로 분리)
         function syncTeamChannels(team, channelsData, fromUnit){
             if(!team||!channelsData) return;
             if(!team.kpis) team.kpis=[];
             const toUnit=team.mainUnit||'억';
             const needConvert=fromUnit&&fromUnit!==toUnit&&MONEY_UNITS.includes(fromUnit)&&MONEY_UNITS.includes(toUnit);
             const channelNames=Object.keys(channelsData);
+
+            // 기존 시트 연동 KPI 모두 제거 (깨끗하게 재생성)
+            team.kpis=team.kpis.filter(k=>!k.sheetChannel);
+
             channelNames.forEach(chName=>{
                 const weeklyData=channelsData[chName];
                 if(!weeklyData||weeklyData.length===0) return;
                 if(totalWeeks===0) totalWeeks=weeklyData.length;
-                // 기존 채널 KPI 찾기 (sheetChannel로 식별)
-                let kpi=team.kpis.find(k=>k.sheetChannel===chName);
-                if(!kpi){
-                    // 기존에 같은 이름의 KPI가 있는지 확인
-                    kpi=team.kpis.find(k=>k.name===chName&&!k.sheetChannel);
-                    if(kpi){
-                        kpi.sheetChannel=chName; // 기존 KPI에 태그 추가
-                    } else {
-                        // 새 KPI 생성
-                        kpi={
-                            name:chName,
-                            target:'0'+toUnit,
-                            current:'0'+toUnit,
-                            percent:0,
-                            isRevenue:true,
-                            isPrimary:true,
-                            sheetChannel:chName,
-                            weeklyData:[]
-                        };
-                        team.kpis.push(kpi);
-                    }
-                }
-                // weeklyData 업데이트 (시트 단위 → 팀 mainUnit 변환)
-                if(needConvert){
-                    kpi.weeklyData=weeklyData.map(w=>{
-                        const won=toWon(w.value,fromUnit);
-                        let v;
-                        if(toUnit==='억') v=Math.round(won/1e8*100)/100;
-                        else if(toUnit==='천만원') v=Math.round(won/1e7*100)/100;
-                        else if(toUnit==='만원') v=Math.round(won/1e4*100)/100;
-                        else v=Math.round(won);
-                        return {label:w.label,value:v};
-                    });
-                } else {
-                    kpi.weeklyData=weeklyData;
-                }
-                kpi.isRevenue=true;
-                kpi.isPrimary=true;
-                recalcKpiFromWeekly(kpi,team);
-                updatedChannels++;
+
+                // 단위 변환
+                const converted=needConvert?weeklyData.map(w=>{
+                    const won=toWon(w.value,fromUnit);
+                    let v;
+                    if(toUnit==='억') v=Math.round(won/1e8*100)/100;
+                    else if(toUnit==='천만원') v=Math.round(won/1e7*100)/100;
+                    else if(toUnit==='만원') v=Math.round(won/1e4*100)/100;
+                    else v=Math.round(won);
+                    return {label:w.label,value:v};
+                }):weeklyData;
+
+                // 주차 데이터를 분기별로 그룹핑
+                const qGroups={};
+                converted.forEach(w=>{
+                    const mm=w.label.match(/^(\d+)월/);
+                    const month=mm?parseInt(mm[1]):1;
+                    const q='Q'+Math.ceil(month/3);
+                    if(!qGroups[q]) qGroups[q]=[];
+                    qGroups[q].push(w);
+                });
+
+                // 분기별 KPI 생성
+                Object.keys(qGroups).forEach(q=>{
+                    const qData=qGroups[q];
+                    const sheetId=chName+'__'+q;
+                    const kpi={
+                        name:chName,
+                        target:'0'+toUnit,
+                        current:'0'+toUnit,
+                        percent:0,
+                        isRevenue:true,
+                        isPrimary:true,
+                        sheetChannel:sheetId,
+                        quarter:q,
+                        weeklyData:qData
+                    };
+                    team.kpis.push(kpi);
+                    recalcKpiFromWeekly(kpi,team);
+                    updatedChannels++;
+                });
             });
-            // 기존 통합 매출 KPI가 있으면 isPrimary=false로 변경 (중복 합산 방지)
+
+            // 기존 통합 매출 KPI가 있으면 비활성화 (중복 합산 방지)
             team.kpis.forEach(k=>{
                 if(k.isRevenue && !k.sheetChannel && channelNames.length>0){
                     k.isPrimary=false;
