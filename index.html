@@ -968,7 +968,7 @@ function manualSync(){
 // ===== 시트 연동 (Google Sheets → 대시보드) =====
 function openSheetSyncModal(){
     const html=`
-    <div class="modal-overlay" onclick="if(event.target===this)this.remove()">
+    <div class="modal-overlay open" onclick="if(event.target===this)this.remove()">
         <div class="modal" style="max-width:520px">
             <div class="modal-header">
                 <div class="modal-title">📊 Google Sheets 연동 설정</div>
