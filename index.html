@@ -1817,7 +1817,7 @@ function renderTeamPage(team){
     <div class="card" style="margin-bottom:28px">
         <div class="card-header"><div class="card-title">주차별 추이</div><div class="card-badge">누적</div></div>
         <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">⭐ 대표 KPI의 주간 데이터 누적 추이입니다.</div>
-        ${renderWeeklyTrendChart(aggregateTeamWeeklyData(team),team.mainUnit||'',c.main,team.name,team.mainTarget)}
+        ${(()=>{const mu=team.mainUnit||'';const qi=Math.floor(new Date().getMonth()/3);const qt=team.quarters&&team.quarters[qi];if(!qt)return renderWeeklyTrendChart(aggregateTeamWeeklyData(team),mu,c.main,team.name,0);const tn=extractNumber(qt.target);const tu=extractUnit(qt.target)||mu;let tv=tn;if(tu!==mu&&MONEY_UNITS.includes(tu)&&MONEY_UNITS.includes(mu)){const w=toWon(tn,tu);if(mu==='억')tv=Math.round(w/1e8*100)/100;else if(mu==='만원')tv=Math.round(w/1e4*100)/100;else tv=w;}return renderWeeklyTrendChart(aggregateTeamWeeklyData(team),mu,c.main,team.name,tv);})()}
     </div>
 
     ${filterBar}
