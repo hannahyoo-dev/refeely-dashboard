@@ -2123,21 +2123,24 @@ function recalcFromPrimaryKpis(team){
         if(k.quarter && k.quarter!=='all' && qMap[k.quarter]!==undefined){
             qSums[qMap[k.quarter]]+=valWon;
             qTargetSums[qMap[k.quarter]]+=tgtWon;
+            totalSum+=valWon;
         } else if(k.weeklyData && k.weeklyData.length>0 && (k.quarter==='all'||!k.quarter)){
-            // quarter='all' + weeklyData 있음 → 주차 데이터를 월 기준으로 분기별 분배
+            let allWdSum=0;
             k.weeklyData.forEach(w=>{
                 const mm=w.label.match(/^(\d+)월/);
                 if(mm){
                     const qi=Math.floor((parseInt(mm[1])-1)/3);
                     const wVal=MONEY_UNITS.includes(mu)?toWon(w.value,mu):w.value;
                     qSums[qi]+=wVal;
+                    allWdSum+=wVal;
                 }
             });
+            totalSum+=allWdSum;
         } else {
             qSums[curQi]+=valWon;
             qTargetSums[curQi]+=tgtWon;
+            totalSum+=valWon;
         }
-        totalSum+=valWon;
     });
     // 팀 메인 지표 업데이트 (mainUnit 기준으로 변환)
     if(team.mainUnit==='억') team.mainCurrent=Math.round(totalSum/1e8*100)/100;
@@ -2469,9 +2472,15 @@ function hideChartTip(){
 function recalcKpiFromWeekly(kpi,team){
     const wd=kpi.weeklyData;
     if(!wd||wd.length===0) return;
-    const sum=wd.reduce((s,w)=>s+w.value,0);
+    // quarter='all'인 시트 연동 KPI → 현재 분기 데이터만 합산
+    let filteredWd=wd;
+    if(kpi.sheetChannel&&(kpi.quarter==='all'||!kpi.quarter)){
+        const curQMonths=getQuarterMonths?getQuarterMonths(currentQuarterLabel()):null;
+        if(curQMonths) filteredWd=wd.filter(w=>isWeekInQuarter(w.label,curQMonths));
+    }
+    const sum=filteredWd.reduce((s,w)=>s+w.value,0);
     const isAvg=kpi.aggType==='avg';
-    const val=isAvg?Math.round((sum/wd.length)*100)/100:sum;
+    const val=isAvg?(filteredWd.length>0?Math.round((sum/filteredWd.length)*100)/100:0):sum;
     // weeklyData 기준 단위: 금액 KPI면 team.mainUnit, 아니면 target 단위
     const tgtUnit=extractUnit(kpi.target)||'';
     const isMoneyKpi=MONEY_UNITS.includes(tgtUnit)||MONEY_UNITS.includes(team.mainUnit);
