@@ -1029,7 +1029,7 @@ async function syncFromSheet(){
         // 시트에서 보내온 단위 정보 (없으면 '만원' 기본값)
         const sheetUnits=sheetData.units||{};
 
-        // 팀별 채널 KPI 동기화 함수 (분기별로 분리)
+        // 팀별 채널 KPI 동기화 (채널당 카드 1개)
         function syncTeamChannels(team, channelsData, fromUnit){
             if(!team||!channelsData) return;
             if(!team.kpis) team.kpis=[];
@@ -1037,8 +1037,8 @@ async function syncFromSheet(){
             const needConvert=fromUnit&&fromUnit!==toUnit&&MONEY_UNITS.includes(fromUnit)&&MONEY_UNITS.includes(toUnit);
             const channelNames=Object.keys(channelsData);
 
-            // 기존 시트 연동 KPI 모두 제거 (깨끗하게 재생성)
-            team.kpis=team.kpis.filter(k=>!k.sheetChannel);
+            // 기존 시트 연동 KPI + 기존 수동 매출 KPI 모두 제거
+            team.kpis=team.kpis.filter(k=>!k.sheetChannel&&!k.isRevenue);
 
             channelNames.forEach(chName=>{
                 const weeklyData=channelsData[chName];
@@ -1056,43 +1056,21 @@ async function syncFromSheet(){
                     return {label:w.label,value:v};
                 }):weeklyData;
 
-                // 주차 데이터를 분기별로 그룹핑
-                const qGroups={};
-                converted.forEach(w=>{
-                    const mm=w.label.match(/^(\d+)월/);
-                    const month=mm?parseInt(mm[1]):1;
-                    const q='Q'+Math.ceil(month/3);
-                    if(!qGroups[q]) qGroups[q]=[];
-                    qGroups[q].push(w);
-                });
-
-                // 분기별 KPI 생성
-                Object.keys(qGroups).forEach(q=>{
-                    const qData=qGroups[q];
-                    const sheetId=chName+'__'+q;
-                    const kpi={
-                        title:chName,
-                        target:'0'+toUnit,
-                        current:'0'+toUnit,
-                        percent:0,
-                        isRevenue:true,
-                        isPrimary:true,
-                        sheetChannel:sheetId,
-                        quarter:q,
-                        weeklyData:qData
-                    };
-                    team.kpis.push(kpi);
-                    recalcKpiFromWeekly(kpi,team);
-                    updatedChannels++;
-                });
-            });
-
-            // 기존 통합 매출 KPI가 있으면 비활성화 (중복 합산 방지)
-            team.kpis.forEach(k=>{
-                if(k.isRevenue && !k.sheetChannel && channelNames.length>0){
-                    k.isPrimary=false;
-                    k.isRevenue=false;
-                }
+                // 채널당 KPI 1개 생성 (quarter='all')
+                const kpi={
+                    title:chName,
+                    target:'0'+toUnit,
+                    current:'0'+toUnit,
+                    percent:0,
+                    isRevenue:true,
+                    isPrimary:true,
+                    sheetChannel:chName,
+                    quarter:'all',
+                    weeklyData:converted
+                };
+                team.kpis.push(kpi);
+                recalcKpiFromWeekly(kpi,team);
+                updatedChannels++;
             });
         }
 
@@ -2138,17 +2116,27 @@ function recalcFromPrimaryKpis(team){
     const qTargetSums=[0,0,0,0];
     let totalSum=0;
     // KPI 값을 '원' 단위로 통일해서 합산
+    const mu=team.mainUnit||'';
     primaryKpis.forEach(k=>{
         const val=extractNumber(k.current);
         const valUnit=extractUnit(k.current);
         const tgt=extractNumber(k.target);
         const tgtU=extractUnit(k.target);
-        // 원 단위로 변환
-        const valWon=MONEY_UNITS.includes(valUnit)?toWon(val,valUnit):MONEY_UNITS.includes(team.mainUnit)?toWon(val,team.mainUnit):val;
-        const tgtWon=MONEY_UNITS.includes(tgtU)?toWon(tgt,tgtU):MONEY_UNITS.includes(team.mainUnit)?toWon(tgt,team.mainUnit):tgt;
+        const valWon=MONEY_UNITS.includes(valUnit)?toWon(val,valUnit):MONEY_UNITS.includes(mu)?toWon(val,mu):val;
+        const tgtWon=MONEY_UNITS.includes(tgtU)?toWon(tgt,tgtU):MONEY_UNITS.includes(mu)?toWon(tgt,mu):tgt;
         if(k.quarter && k.quarter!=='all' && qMap[k.quarter]!==undefined){
             qSums[qMap[k.quarter]]+=valWon;
             qTargetSums[qMap[k.quarter]]+=tgtWon;
+        } else if(k.weeklyData && k.weeklyData.length>0 && (k.quarter==='all'||!k.quarter)){
+            // quarter='all' + weeklyData 있음 → 주차 데이터를 월 기준으로 분기별 분배
+            k.weeklyData.forEach(w=>{
+                const mm=w.label.match(/^(\d+)월/);
+                if(mm){
+                    const qi=Math.floor((parseInt(mm[1])-1)/3);
+                    const wVal=MONEY_UNITS.includes(mu)?toWon(w.value,mu):w.value;
+                    qSums[qi]+=wVal;
+                }
+            });
         } else {
             qSums[curQi]+=valWon;
             qTargetSums[curQi]+=tgtWon;
