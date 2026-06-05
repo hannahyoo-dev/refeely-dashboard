@@ -1678,13 +1678,29 @@ function renderTeamPage(team){
         const hasWeekly=getKpiWeeklyData(team,k,k._idx).length>0;
         const hint=(!isSelected&&!hasExpanded)?'<div style="font-size:10px;color:var(--gray-400);margin-top:8px;text-align:center">클릭하여 주차별 추이 보기 '+(hasWeekly?'📊':'')+'</div>':'';
         const selectedIcon=isSelected?'<div style="position:absolute;top:12px;left:12px;font-size:10px;font-weight:700;color:'+c.main+';background:'+c.bg+';padding:2px 8px;border-radius:6px;">📊 선택됨</div>':'';
+        // 시트 연동 KPI: 선택된 분기 값 표시
+        const displayQ=sq!=='all'?sq:['Q1','Q2','Q3','Q4'][Math.floor(new Date().getMonth()/3)];
+        let dispVal=k.current, dispPct=k.percent;
+        if(k._quarterValues&&k._quarterValues[displayQ]!==undefined){
+            const qv=k._quarterValues[displayQ];
+            dispVal=autoFormatValue(Math.round(qv*100)/100,team.mainUnit||'');
+            const tgtNum=extractNumber(k.target);
+            if(tgtNum>0){
+                const tgtU=extractUnit(k.target)||team.mainUnit||'';
+                const mu=team.mainUnit||'';
+                const qvWon=MONEY_UNITS.includes(mu)?toWon(qv,mu):qv;
+                const tgtWon=MONEY_UNITS.includes(tgtU)?toWon(tgtNum,tgtU):tgtNum;
+                dispPct=tgtWon>0?Math.round((qvWon/tgtWon)*100):0;
+            } else { dispPct=0; }
+        }
+        const dispQTag='<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+c.bg+';color:'+c.main+';margin-left:6px">'+displayQ+'</span>';
         return `<div class="kpi-card" style="${selectedStyle}${primaryBorder}cursor:pointer;" onclick="toggleKpiChart('${team.id}',${i})">
             ${selectedIcon}
             <button class="edit-btn" onclick="event.stopPropagation();openKpiModal('${team.id}',${i})">✏️</button>
             <button class="delete-btn" onclick="event.stopPropagation();deleteKpi('${team.id}',${i})">🗑</button>
-            <div class="kpi-title">${k.title}${primaryTag}${revenueTag}${qTag}${aggTag}</div>
-            <div class="kpi-row"><div class="kpi-value" style="color:${c.main}">${k.current}</div><div class="kpi-target">${k.target}</div></div>
-            <div class="kpi-progress"><div class="progress-track"><div class="progress-fill" style="width:0%;background:${c.grad}" data-target="${k.percent}"></div><span class="progress-pct">${k.percent}%</span></div></div>
+            <div class="kpi-title">${k.title}${primaryTag}${revenueTag}${k._quarterValues?dispQTag:qTag}${aggTag}</div>
+            <div class="kpi-row"><div class="kpi-value" style="color:${c.main}">${dispVal}</div><div class="kpi-target">${k.target}</div></div>
+            <div class="kpi-progress"><div class="progress-track"><div class="progress-fill" style="width:0%;background:${c.grad}" data-target="${dispPct}"></div><span class="progress-pct">${dispPct}%</span></div></div>
             ${hint}
         </div>`;
     }
@@ -2472,12 +2488,18 @@ function hideChartTip(){
 function recalcKpiFromWeekly(kpi,team){
     const wd=kpi.weeklyData;
     if(!wd||wd.length===0) return;
-    // quarter='all'인 시트 연동 KPI → 현재 분기 데이터만 합산
-    let filteredWd=wd;
+    // 시트 연동 KPI → 분기별 값 계산
     if(kpi.sheetChannel&&(kpi.quarter==='all'||!kpi.quarter)){
-        const curQMonths=getQuarterMonths?getQuarterMonths(currentQuarterLabel()):null;
-        if(curQMonths) filteredWd=wd.filter(w=>isWeekInQuarter(w.label,curQMonths));
+        const qv={};
+        ['Q1','Q2','Q3','Q4'].forEach(q=>{
+            const qm=getQuarterMonths(q);
+            const qWd=wd.filter(w=>isWeekInQuarter(w.label,qm));
+            qv[q]=qWd.reduce((s,w)=>s+w.value,0);
+        });
+        kpi._quarterValues=qv;
     }
+    const curQMonths=(kpi.sheetChannel&&(kpi.quarter==='all'||!kpi.quarter))?getQuarterMonths(currentQuarterLabel()):null;
+    const filteredWd=curQMonths?wd.filter(w=>isWeekInQuarter(w.label,curQMonths)):wd;
     const sum=filteredWd.reduce((s,w)=>s+w.value,0);
     const isAvg=kpi.aggType==='avg';
     const val=isAvg?(filteredWd.length>0?Math.round((sum/filteredWd.length)*100)/100:0):sum;
