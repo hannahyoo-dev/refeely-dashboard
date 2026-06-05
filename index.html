@@ -1025,12 +1025,10 @@ async function syncFromSheet(){
         // 시트에서 보내온 단위 정보 (없으면 '만원' 기본값)
         const sheetUnits=sheetData.units||{};
 
-        // 팀별 채널 KPI 동기화 (채널당 카드 1개)
+        // 팀별 채널 KPI 동기화 (채널당 카드 1개, 만원 단위 유지)
         function syncTeamChannels(team, channelsData, fromUnit){
             if(!team||!channelsData) return;
             if(!team.kpis) team.kpis=[];
-            const toUnit=team.mainUnit||'억';
-            const needConvert=fromUnit&&fromUnit!==toUnit&&MONEY_UNITS.includes(fromUnit)&&MONEY_UNITS.includes(toUnit);
             const channelNames=Object.keys(channelsData);
 
             // 기존 시트 연동 KPI + 기존 수동 매출 KPI 모두 제거
@@ -1041,28 +1039,18 @@ async function syncFromSheet(){
                 if(!weeklyData||weeklyData.length===0) return;
                 if(totalWeeks===0) totalWeeks=weeklyData.length;
 
-                // 단위 변환
-                const converted=needConvert?weeklyData.map(w=>{
-                    const won=toWon(w.value,fromUnit);
-                    let v;
-                    if(toUnit==='억') v=Math.round(won/1e8*100)/100;
-                    else if(toUnit==='천만원') v=Math.round(won/1e7*100)/100;
-                    else if(toUnit==='만원') v=Math.round(won/1e4*100)/100;
-                    else v=Math.round(won);
-                    return {label:w.label,value:v};
-                }):weeklyData;
-
-                // 채널당 KPI 1개 생성 (quarter='all')
+                // 단위 변환 안 함 — 만원 그대로 저장 (소수점 손실 방지)
                 const kpi={
                     title:chName,
-                    target:'0'+toUnit,
-                    current:'0'+toUnit,
+                    target:'0만원',
+                    current:'0만원',
                     percent:0,
                     isRevenue:true,
                     isPrimary:true,
                     sheetChannel:chName,
+                    sheetUnit:fromUnit||'만원',
                     quarter:'all',
-                    weeklyData:converted
+                    weeklyData:weeklyData
                 };
                 team.kpis.push(kpi);
                 recalcKpiFromWeekly(kpi,team);
@@ -2142,11 +2130,12 @@ function recalcFromPrimaryKpis(team){
             totalSum+=valWon;
         } else if(k.weeklyData && k.weeklyData.length>0 && (k.quarter==='all'||!k.quarter)){
             let allWdSum=0;
+            const wdUnit=k.sheetUnit||mu;
             k.weeklyData.forEach(w=>{
                 const mm=w.label.match(/^(\d+)월/);
                 if(mm){
                     const qi=Math.floor((parseInt(mm[1])-1)/3);
-                    const wVal=MONEY_UNITS.includes(mu)?toWon(w.value,mu):w.value;
+                    const wVal=MONEY_UNITS.includes(wdUnit)?toWon(w.value,wdUnit):w.value;
                     qSums[qi]+=wVal;
                     allWdSum+=wVal;
                 }
@@ -2503,10 +2492,10 @@ function recalcKpiFromWeekly(kpi,team){
     const sum=filteredWd.reduce((s,w)=>s+w.value,0);
     const isAvg=kpi.aggType==='avg';
     const val=isAvg?(filteredWd.length>0?Math.round((sum/filteredWd.length)*100)/100:0):sum;
-    // weeklyData 기준 단위: 금액 KPI면 team.mainUnit, 아니면 target 단위
+    // weeklyData 기준 단위: 시트 연동 KPI는 sheetUnit(만원), 나머지는 team.mainUnit
     const tgtUnit=extractUnit(kpi.target)||'';
     const isMoneyKpi=MONEY_UNITS.includes(tgtUnit)||MONEY_UNITS.includes(team.mainUnit);
-    const baseUnit=isMoneyKpi?(team.mainUnit||tgtUnit):(tgtUnit||extractUnit(kpi.current)||'');
+    const baseUnit=kpi.sheetUnit||( isMoneyKpi?(team.mainUnit||tgtUnit):(tgtUnit||extractUnit(kpi.current)||'') );
     kpi.current=autoFormatValue(val,baseUnit);
     // 달성률: 금액이면 원 단위로 통일해서 비교
     const tgtNum=extractNumber(kpi.target);
