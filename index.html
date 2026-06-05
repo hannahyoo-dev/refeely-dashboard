@@ -574,9 +574,13 @@ function sortWeeklyData(wd){
 }
 
 // ===== WEEKLY TREND CHART (전사 주차별 추이) =====
-function aggregateWeeklyData(){
-    // 모든 팀의 isRevenue KPI 주간 데이터를 주차별로 합산 (억 단위로 통일)
-    const weekMap=new Map(); // label -> {sum, weekStart}
+function getQuarterMonths(q){return {Q1:[1,2,3],Q2:[4,5,6],Q3:[7,8,9],Q4:[10,11,12]}[q]||null;}
+function currentQuarterLabel(){return ['Q1','Q2','Q3','Q4'][Math.floor(new Date().getMonth()/3)];}
+function isWeekInQuarter(label,qMonths){if(!qMonths)return true;const mm=label.match(/^(\d+)월/);return mm?qMonths.includes(parseInt(mm[1])):true;}
+
+function aggregateWeeklyData(quarterFilter){
+    const qMonths=quarterFilter?getQuarterMonths(quarterFilter):null;
+    const weekMap=new Map();
     if(!DATA.teams) return [];
     DATA.teams.forEach(team=>{
         if(!team.kpis) return;
@@ -584,40 +588,29 @@ function aggregateWeeklyData(){
         team.kpis.forEach(kpi=>{
             if(!kpi.isRevenue||!kpi.weeklyData) return;
             kpi.weeklyData.forEach(w=>{
+                if(!isWeekInQuarter(w.label,qMonths)) return;
                 const existing=weekMap.get(w.label)||{sum:0,label:w.label};
-                // 팀의 mainUnit 기준 값을 억으로 변환하여 합산
                 existing.sum+=toWon(w.value,mu)/1e8;
                 weekMap.set(w.label,existing);
             });
         });
     });
-    // label 기준 정렬 (날짜 파싱)
     const entries=Array.from(weekMap.values());
     entries.sort((a,b)=>{
-        const parseDate=lbl=>{
-            const m=lbl.match(/(\d+)월\s*(\d+)일/);
-            if(!m) return 0;
-            return parseInt(m[1])*100+parseInt(m[2]);
-        };
+        const parseDate=lbl=>{const m=lbl.match(/(\d+)월\s*(\d+)일/);if(!m)return 0;return parseInt(m[1])*100+parseInt(m[2]);};
         return parseDate(a.label)-parseDate(b.label);
     });
     return entries;
 }
 
 function aggregateTeamWeeklyData(team, quarterFilter){
-    // 한 팀의 대표 KPI 주간 데이터를 주차별로 합산
-    // quarterFilter: 'Q1','Q2' 등 → 해당 분기만, 없으면 전체
-    const qMonths=quarterFilter?{Q1:[1,2,3],Q2:[4,5,6],Q3:[7,8,9],Q4:[10,11,12]}[quarterFilter]:null;
+    const qMonths=quarterFilter?getQuarterMonths(quarterFilter):null;
     const weekMap=new Map();
     if(!team.kpis) return [];
     team.kpis.forEach(kpi=>{
         if(!kpi.isPrimary||!kpi.weeklyData) return;
         kpi.weeklyData.forEach(w=>{
-            // 분기 필터 적용
-            if(qMonths){
-                const mm=w.label.match(/^(\d+)월/);
-                if(mm && !qMonths.includes(parseInt(mm[1]))) return;
-            }
+            if(!isWeekInQuarter(w.label,qMonths)) return;
             const existing=weekMap.get(w.label)||{sum:0,label:w.label};
             existing.sum+=w.value;
             weekMap.set(w.label,existing);
@@ -625,11 +618,7 @@ function aggregateTeamWeeklyData(team, quarterFilter){
     });
     const entries=Array.from(weekMap.values());
     entries.sort((a,b)=>{
-        const parseDate=lbl=>{
-            const m=lbl.match(/(\d+)월\s*(\d+)일/);
-            if(!m) return 0;
-            return parseInt(m[1])*100+parseInt(m[2]);
-        };
+        const parseDate=lbl=>{const m=lbl.match(/(\d+)월\s*(\d+)일/);if(!m)return 0;return parseInt(m[1])*100+parseInt(m[2]);};
         return parseDate(a.label)-parseDate(b.label);
     });
     return entries;
@@ -1389,7 +1378,7 @@ function renderOverview(){
             <div class="card-badge">누적 그래프</div>
         </div>
         <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">💰 매출 반영 KPI의 주간 데이터를 누적 합산한 추이입니다. 점선은 현재 분기 목표입니다.</div>
-        ${renderWeeklyTrendChart(aggregateWeeklyData(),'억','#50CC93','전사 매출',curQ.target)}
+        ${renderWeeklyTrendChart(aggregateWeeklyData(currentQuarterLabel()),'억','#50CC93','전사 매출',curQ.target)}
     </div>
 
     <div class="team-overview-grid">${teamCards}</div>
@@ -3075,6 +3064,10 @@ renderContent();
 if(syncUrl){
     updateSyncUI('connected','클라우드 연결됨');
     pullFromCloud();
+}
+// 시트 자동 연동 (페이지 로드 시)
+if(sheetSyncUrl){
+    syncFromSheet();
 }
 </script>
 </body>
