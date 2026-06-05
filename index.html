@@ -604,13 +604,20 @@ function aggregateWeeklyData(){
     return entries;
 }
 
-function aggregateTeamWeeklyData(team){
+function aggregateTeamWeeklyData(team, quarterFilter){
     // 한 팀의 대표 KPI 주간 데이터를 주차별로 합산
+    // quarterFilter: 'Q1','Q2' 등 → 해당 분기만, 없으면 전체
+    const qMonths=quarterFilter?{Q1:[1,2,3],Q2:[4,5,6],Q3:[7,8,9],Q4:[10,11,12]}[quarterFilter]:null;
     const weekMap=new Map();
     if(!team.kpis) return [];
     team.kpis.forEach(kpi=>{
         if(!kpi.isPrimary||!kpi.weeklyData) return;
         kpi.weeklyData.forEach(w=>{
+            // 분기 필터 적용
+            if(qMonths){
+                const mm=w.label.match(/^(\d+)월/);
+                if(mm && !qMonths.includes(parseInt(mm[1]))) return;
+            }
             const existing=weekMap.get(w.label)||{sum:0,label:w.label};
             existing.sum+=w.value;
             weekMap.set(w.label,existing);
@@ -1796,7 +1803,7 @@ function renderTeamPage(team){
     <div class="card" style="margin-bottom:28px">
         <div class="card-header"><div class="card-title">주차별 추이</div><div class="card-badge">누적</div></div>
         <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">⭐ 대표 KPI의 주간 데이터 누적 추이입니다.</div>
-        ${(()=>{const mu=team.mainUnit||'';const qi=Math.floor(new Date().getMonth()/3);const qt=team.quarters&&team.quarters[qi];if(!qt)return renderWeeklyTrendChart(aggregateTeamWeeklyData(team),mu,c.main,team.name,0);const tn=extractNumber(qt.target);const tu=extractUnit(qt.target)||mu;let tv=tn;if(tu!==mu&&MONEY_UNITS.includes(tu)&&MONEY_UNITS.includes(mu)){const w=toWon(tn,tu);if(mu==='억')tv=Math.round(w/1e8*100)/100;else if(mu==='만원')tv=Math.round(w/1e4*100)/100;else tv=w;}return renderWeeklyTrendChart(aggregateTeamWeeklyData(team),mu,c.main,team.name,tv);})()}
+        ${(()=>{const mu=team.mainUnit||'';const qi=Math.floor(new Date().getMonth()/3);const curQ=['Q1','Q2','Q3','Q4'][qi];const qt=team.quarters&&team.quarters[qi];if(!qt)return renderWeeklyTrendChart(aggregateTeamWeeklyData(team,curQ),mu,c.main,team.name,0);const tn=extractNumber(qt.target);const tu=extractUnit(qt.target)||mu;let tv=tn;if(tu!==mu&&MONEY_UNITS.includes(tu)&&MONEY_UNITS.includes(mu)){const w=toWon(tn,tu);if(mu==='억')tv=Math.round(w/1e8*100)/100;else if(mu==='만원')tv=Math.round(w/1e4*100)/100;else tv=w;}return renderWeeklyTrendChart(aggregateTeamWeeklyData(team,curQ),mu,c.main,team.name,tv);})()}
     </div>
 
     ${filterBar}
