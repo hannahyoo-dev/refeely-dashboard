@@ -429,7 +429,8 @@ let isSyncing = false;
 
 // ===== 시트 연동 설정 =====
 const SHEET_SYNC_URL_KEY = 'refeelySheetSyncUrl';
-let sheetSyncUrl = localStorage.getItem(SHEET_SYNC_URL_KEY) || '';
+const SHEET_SYNC_DEFAULT_URL = 'https://script.google.com/macros/s/AKfycby44isOrU6j6J6PRVhn0xC9NB2Iw_rdApOBCJScoPuNETccBp6OLPp9U6xT2yXWfFW3Hw/exec';
+let sheetSyncUrl = localStorage.getItem(SHEET_SYNC_URL_KEY) || SHEET_SYNC_DEFAULT_URL;
 let isSheetSyncing = false;
 
 // ===== DARK MODE =====
