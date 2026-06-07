@@ -587,10 +587,11 @@ function aggregateWeeklyData(quarterFilter){
         const mu=team.mainUnit||'억';
         team.kpis.forEach(kpi=>{
             if(!kpi.isRevenue||!kpi.weeklyData) return;
+            const kpiUnit=kpi.sheetUnit||mu;
             kpi.weeklyData.forEach(w=>{
                 if(!isWeekInQuarter(w.label,qMonths)) return;
                 const existing=weekMap.get(w.label)||{sum:0,label:w.label};
-                existing.sum+=toWon(w.value,mu)/1e8;
+                existing.sum+=toWon(w.value,kpiUnit)/1e8;
                 weekMap.set(w.label,existing);
             });
         });
